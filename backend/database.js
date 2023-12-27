@@ -5,7 +5,7 @@ const pool = new Pool({
     host: "localhost",
     database: "project",
     password: "semxhart",
-    port: 5432, // default PostgreSQL port
+    port: 3000, // default PostgreSQL port
 });
 
 async function runQueries() {
