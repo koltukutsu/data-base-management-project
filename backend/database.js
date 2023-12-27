@@ -5,7 +5,7 @@ const pool = new Pool({
     host: "localhost",
     database: "project",
     password: "semxhart",
-    port: 3000, // default PostgreSQL port
+    port: 5432, // default PostgreSQL port
 });
 
 async function runQueries() {
@@ -73,11 +73,11 @@ async function authenticateUser(userName, password) {
         try {
             const sqlQuery = `SELECT * FROM users WHERE username = '${userName}' AND pw = '${password}'`;
             const sqlResult = await client.query(sqlQuery);
-            
+
             if (sqlResult.rows.length == 0) {
                 console.log("No user found");
                 return null;
-            
+
             } else {
                 console.log("Results: ", sqlResult.rows);
                 return sqlResult;
