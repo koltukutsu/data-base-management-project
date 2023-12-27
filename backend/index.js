@@ -28,6 +28,24 @@ app.post("/authenticate", express.json(), async (req, res) => {
     }
 });
 
+app.get("/organizations", async (req, res) => {
+    const organizations = await getOrganizations();
+    if (organizations) {
+        return res.status(200).json({ success: true, organizations });
+    } else {
+        return res.status(401).json(null);
+    }
+});
+
+app.get("/company", async (req, res) => {
+    const company = await getCompany();
+    if (company) {
+        return res.status(200).json({ success: true, company });
+    } else {
+        return res.status(401).json(null);
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
