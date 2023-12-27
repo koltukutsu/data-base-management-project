@@ -1,13 +1,33 @@
 //// server
 const express = require("express")
+const { authenticateUser } = require("./database")
 const app = express()
+const cors = require("cors"); // Import the cors middleware
 const port = 3200
 //// pg, database
 
-app.get("/", (req, res) => {
-    res.status(200).send("merhaba anne, project backend");
-})
+app.use(cors())
+
+// Set up an authentication endpoint
+app.post("/authenticate", express.json(), async (req, res) => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required." });
+    }
+
+    const user = await authenticateUser(username, password);
+
+    if (user) {
+        // Authentication successful
+        return res.status(200).json({ success: true, user });
+    } else {
+        // Authentication failed
+        console.log("AUTHENTICATION: user is not found ->", username, password)
+        return res.status(401).json(null);
+    }
+});
 
 app.listen(port, () => {
-    console.log(`App running on port ${port}`)
-})
+    console.log(`Server is running on http://localhost:${port}`);
+});

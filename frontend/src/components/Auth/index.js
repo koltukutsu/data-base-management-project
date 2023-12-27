@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 // import Checkbox from '@mui/material/Checkbox';
 // import Link from '@mui/material/Link';
 // import Grid from '@mui/material/Grid';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
@@ -31,16 +31,44 @@ function Copyright(props) {
 
 const defaultTheme = createTheme();
 
-export default function Authentication () {
-  const navigate = useNavigate ();
-  const handleSubmit = (event) => {
+export default function Authentication() {
+  const navigate = useNavigate();
+  const handleSubmit = async (event) => {
+    const url = "http://localhost:3200/authenticate"
+
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
-      email: data.get('email'),
+      email: data.get('username'),
       password: data.get('password'),
     });
-    navigate("/home")
+    // make an post request to backend, the backend is running on port 3200
+    const requestBody = {
+      username: data.get('username'),
+      password: data.get('password'),
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other headers if needed
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        // const result = await response.json();
+        // setData(result);
+        navigate("/home")
+      } else {
+        alert("Kullanıcı adı veya şifre hatalı")
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error during fetch:', error);
+    }
   };
 
   return (
@@ -66,10 +94,10 @@ export default function Authentication () {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Kullanıcı Adı"
+              name="username"
+              autoComplete="username"
               autoFocus
             />
             <TextField
@@ -77,7 +105,7 @@ export default function Authentication () {
               required
               fullWidth
               name="password"
-              label="Password"
+              label="Şifre"
               type="password"
               id="password"
               autoComplete="current-password"
