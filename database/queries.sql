@@ -1,13 +1,17 @@
--- view kullanarak girilen organizasyona ait şirketleri listeler
+    -- TAMAMDIR
+    -- view kullanarak girilen organizasyona ait şirketleri listeler
 SELECT *
 FROM company_view
 WHERE org_name = `$user_input`;
--- kullanıcıyı id'sini sequence kullanarak oluşturup listeye ekler
+
+
+    -- kullanıcıyı id'sini sequence kullanarak oluşturup listeye ekler
 INSERT INTO users (id, username, pw)
 VALUES (nextval('users_id_seq'), `$username`, `password`);
--- kullanıcının silinmesi
+    -- kullanıcının silinmesi
 DELETE FROM users
 WHERE id = `$user_id`;
+    
 -- intersect ve view kullanarak verilen koşullar için en az bir açıkta teklifi bulunan şirketleri listeler
 -- (aynı zamanda having ve group by da içeriyor)
 SELECT DISTINCT *

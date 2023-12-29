@@ -93,10 +93,144 @@ async function authenticateUser(userName, password) {
 
 }
 
-async function getOrganizations() {
+async function getOrganizations(organizationName) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `SELECT * FROM company_view WHERE org_name =  ${organizationName}`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                console.log("Database | getOrganizations(): No organization found");
+                console.log("No organization found");
+                return null;
+            }
+            else {
+                console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
+                return sqlResult;
+            }
 
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
 }
 
-// authenticateUser("user1", "pw1");
+async function addUser(userName, password) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `INSERT INTO users (id, username, pw)
+            VALUES (nextval('users_id_seq'), ${userName}, ${password})`;
+            const sqlResult = await client.query(sqlQuery);
 
-module.exports = { authenticateUser };
+            // TODO what does that query return?
+            if (sqlResult.rows.length == 0) {
+                return null;
+            }
+            else {
+                return true;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+async function deleteUser(userId) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `DELETE FROM users WHERE id = ${userId}`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                return null;
+            }
+            else {
+                return sqlResult;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+async function udpateOffers(userId, id) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `UPDATE offers SET accepted = 'TRUE', accepted_by_id = ${userId} WHERE id = ${id}`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                return null;
+            }
+            else {
+                return sqlResult;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+async function listAvailableOffers(userId, userInput) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `
+                SELECT DISTINCT *
+                FROM company_view
+                WHERE org_name = $1
+                INTERSECT
+                SELECT companies.comp_name, organizations.org_name
+                FROM companies
+                         JOIN offers ON companies.id = offers.comp_id
+                         JOIN organizations ON offers.org_type = organizations.id
+                WHERE organizations.org_name = $2
+                  AND offers.accepted = 'FALSE'
+                GROUP BY companies.comp_name
+                HAVING COUNT(offers.comp_id) > 0
+            `;
+            const sqlResult = await client.query(sqlQuery, [userInput, userInput]);
+
+            if (sqlResult.rows.length === 0) {
+                return null;
+            } else {
+                return sqlResult.rows;
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+// // Example usage:
+// const userId = 'someUserId';
+// const userInput = 'someOrgName';
+// const result = await listAvailableOffers(userId, userInput);
+// console.log(result);
+
+
+module.exports = { authenticateUser, getOrganizations, addUser, deleteUser, udpateOffers, listAvailableOffers }
