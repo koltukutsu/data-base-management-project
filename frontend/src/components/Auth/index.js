@@ -14,6 +14,9 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+// api
+import api from '../../api';
+
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
@@ -34,33 +37,15 @@ const defaultTheme = createTheme();
 export default function Authentication() {
   const navigate = useNavigate();
   const handleSubmit = async (event) => {
-    const url = "http://localhost:3200/authenticate"
-
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('username'),
-      password: data.get('password'),
-    });
-    // make an post request to backend, the backend is running on port 3200
-    const requestBody = {
-      username: data.get('username'),
-      password: data.get('password'),
-    };
+    const username = data.get('username');
+    const password = data.get('password');
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any other headers if needed
-        },
-        body: JSON.stringify(requestBody),
-      });
-
+      const response = await api.authenticateUser(username, password);
+      console.log(response)
       if (response.ok) {
-        // const result = await response.json();
-        // setData(result);
         navigate("/home")
       } else {
         alert("Kullanıcı adı veya şifre hatalı")

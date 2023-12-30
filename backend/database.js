@@ -75,12 +75,14 @@ async function authenticateUser(userName, password) {
             const sqlResult = await client.query(sqlQuery, [userName, password]);
 
             if (sqlResult.rows.length == 0) {
-                console.log("No user found");
+                console.log("Database - authenticateUser(): No user found, return null");
                 return null;
 
             } else {
                 console.log("Results: ", sqlResult.rows);
-                return sqlResult;
+                return {
+                    "status": true
+                };
             }
         } catch (err) {
             console.error("Error executing query", err);
