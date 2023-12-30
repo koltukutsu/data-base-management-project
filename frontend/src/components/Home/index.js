@@ -60,7 +60,7 @@ const Home = () => {
           Parti Dünyası
         </Typography>
         <Typography variant="body1" paragraph>
-          Organizasyon Çeşidi Seşiniz:
+          Organizasyon Çeşidi Seçiniz:
         </Typography>
         <Select
           label="Bir tane seçiniz"
@@ -94,7 +94,7 @@ const Home = () => {
           Şirketler
         </Typography>
         <Typography variant="body1" paragraph>
-          Şirket Çeşidi Seşiniz:
+          Şirket Çeşidi Seçiniz:
         </Typography>
         <Select
           label="Bir tane seçiniz"
@@ -270,7 +270,7 @@ const Home = () => {
   };
 
   return (
-    <Container className="p">
+    <Container className="pt-10">
       <Grid container spacing={4}>
         <Grid item xs={8}>
           <ChooseOrganizationType />
