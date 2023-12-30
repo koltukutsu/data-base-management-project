@@ -1,51 +1,123 @@
-//// server
-const express = require("express")
-const { authenticateUser } = require("./database")
-const app = express()
-const cors = require("cors"); // Import the cors middleware
-const port = 3200
-//// pg, database
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const {
+    authenticateUser,
+    getOrganizations,
+    addUser,
+    deleteUser,
+    updateOffers,
+    listAvailableOffers
+} = require('./database.js');
 
-app.use(cors())
+const app = express();
 
-// Set up an authentication endpoint
-app.post("/authenticate", express.json(), async (req, res) => {
+// Enable CORS for all routes
+app.use(cors());
+
+// Use JSON parser for handling JSON requests
+app.use(bodyParser.json());
+
+app.get("/", (req, res) => {
+    res.json({ message: "Welcome to the backend of our project, kudos you all!!!" });
+});
+
+// Route for authenticating a user
+app.post('/authenticate', async (req, res) => {
     const { username, password } = req.body;
+    const result = await authenticateUser(username, password);
 
-    if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required." });
-    }
-
-    const user = await authenticateUser(username, password);
-
-    if (user) {
-        // Authentication successful
-        return res.status(200).json({ success: true, user });
+    if (result) {
+        res.json(result.rows);
     } else {
-        // Authentication failed
-        console.log("AUTHENTICATION: user is not found ->", username, password)
-        return res.status(401).json(null);
+        res.status(401).json({ message: 'Authentication failed' });
     }
 });
 
-app.get("/organizations", async (req, res) => {
-    const organizations = await getOrganizations();
-    if (organizations) {
-        return res.status(200).json({ success: true, organizations });
+// route for getting all of organizations
+app.get('/organizations', async (req, res) => {
+    const result = await getOrganizations(null);
+
+    if (result) {
+        res.json(result);
     } else {
-        return res.status(401).json(null);
+        res.status(404).json({ message: 'No organizations found' });
     }
 });
 
-app.get("/company", async (req, res) => {
-    const company = await getCompany();
-    if (company) {
-        return res.status(200).json({ success: true, company });
+// Route for getting specific organizations
+app.get('/organizations/:organizationName', async (req, res) => {
+    const organizationName = req.params.organizationName;
+    const result = await getOrganizations(organizationName);
+
+    if (result) {
+        res.json(result);
     } else {
-        return res.status(401).json(null);
+        res.status(404).json({ message: 'Organization not found' });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+// Route for adding a user
+app.post('/users', async (req, res) => {
+    const { username, password } = req.body;
+    const result = await addUser(username, password);
+
+    if (result) {
+        res.json({ message: 'User added successfully' });
+    } else {
+        res.status(500).json({ message: 'Failed to add user' });
+    }
+});
+
+// Route for deleting a user
+app.delete('/users/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await deleteUser(userId);
+
+    if (result) {
+        res.json({ message: 'User deleted successfully' });
+    } else {
+        res.status(500).json({ message: 'Failed to delete user' });
+    }
+});
+
+// Route for updating offers
+app.put('/offers/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await updateOffers(userId);
+
+    if (result) {
+        res.json({ message: 'Offer updated successfully' });
+    } else {
+        res.status(500).json({ message: 'Failed to update offer' });
+    }
+});
+
+app.get("/offers", async (req, res) => {
+    const result = await listAvailableOffers(null);
+    console.log("\tOnly offers")
+    console.log(result);
+    if (result) {
+        return res.json(result);
+    } else {
+        res.status(404).json({ message: 'No available offers found' });
+    }
+});
+
+// Route for listing available offers
+app.get('/offers/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const result = await listAvailableOffers(userId);
+
+    if (result) {
+        res.json(result);
+    } else {
+        res.status(404).json({ message: 'No available offers found' });
+    }
+});
+
+const PORT = process.env.PORT || 3200;
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

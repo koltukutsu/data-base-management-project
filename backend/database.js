@@ -71,8 +71,8 @@ async function authenticateUser(userName, password) {
     try {
         const client = await pool.connect();
         try {
-            const sqlQuery = `SELECT * FROM users WHERE username = '${userName}' AND pw = '${password}'`;
-            const sqlResult = await client.query(sqlQuery);
+            const sqlQuery = `SELECT * FROM users WHERE username = $1 AND pw = $2`;
+            const sqlResult = await client.query(sqlQuery, [userName, password]);
 
             if (sqlResult.rows.length == 0) {
                 console.log("No user found");
@@ -97,16 +97,30 @@ async function getOrganizations(organizationName) {
     try {
         const client = await pool.connect();
         try {
+            if (organizationName == null) {
+                const sqlQuery = `SELECT * FROM company_view`;
+                const sqlResult = await client.query(sqlQuery);
+                if (sqlResult.rows.length == 0) {
+                    console.log("Database | getOrganizations(): No organization found");
+                    console.log("No organization found");
+                    return null;
+                }
+                else {
+                    console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
+                    return sqlResult.rows;
+                }
+            }
+
             const sqlQuery = `SELECT * FROM company_view WHERE org_name =  ${organizationName}`;
             const sqlResult = await client.query(sqlQuery);
             if (sqlResult.rows.length == 0) {
-                console.log("Database | getOrganizations(): No organization found");
+                console.log(`Database | getOrganizations(): No organization found in name ${organizationName}`);
                 console.log("No organization found");
                 return null;
             }
             else {
                 console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
-                return sqlResult;
+                return sqlResult.rows;
             }
 
         } catch (err) {
@@ -155,7 +169,7 @@ async function deleteUser(userId) {
                 return null;
             }
             else {
-                return sqlResult;
+                return true;
             }
 
         } catch (err) {
@@ -168,7 +182,7 @@ async function deleteUser(userId) {
     }
 }
 
-async function udpateOffers(userId, id) {
+async function updateOffers(userId) {
     try {
         const client = await pool.connect();
         try {
@@ -191,10 +205,28 @@ async function udpateOffers(userId, id) {
     }
 }
 
-async function listAvailableOffers(userId, userInput) {
+async function listAvailableOffers(userId) {
     try {
+        console.log("Getting data from database");
         const client = await pool.connect();
         try {
+            console.log("2 Getting data from database");
+
+            if (userId == null) {
+                console.log("3 Getting data from database");
+                const sqlQuery = `SELECT *
+                FROM offers;
+                `;
+
+                const sqlResult = await client.query(sqlQuery);
+                // console.log(sqlResult);
+                if (sqlResult.rows.length === 0) {
+                    return null;
+                } else {
+                    return sqlResult.rows;
+                }
+            }
+
             const sqlQuery = `
                 SELECT DISTINCT *
                 FROM company_view
@@ -204,12 +236,12 @@ async function listAvailableOffers(userId, userInput) {
                 FROM companies
                          JOIN offers ON companies.id = offers.comp_id
                          JOIN organizations ON offers.org_type = organizations.id
-                WHERE organizations.org_name = $2
+                WHERE organizations.org_name = $1
                   AND offers.accepted = 'FALSE'
                 GROUP BY companies.comp_name
                 HAVING COUNT(offers.comp_id) > 0
             `;
-            const sqlResult = await client.query(sqlQuery, [userInput, userInput]);
+            const sqlResult = await client.query(sqlQuery, [userId]);
 
             if (sqlResult.rows.length === 0) {
                 return null;
@@ -233,4 +265,4 @@ async function listAvailableOffers(userId, userInput) {
 // console.log(result);
 
 
-module.exports = { authenticateUser, getOrganizations, addUser, deleteUser, udpateOffers, listAvailableOffers }
+module.exports = { authenticateUser, getOrganizations, addUser, deleteUser, updateOffers, listAvailableOffers }
