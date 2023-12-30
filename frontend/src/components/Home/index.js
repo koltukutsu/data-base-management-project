@@ -14,6 +14,7 @@ import {
   TableBody,
 } from "@mui/material";
 import api from "../../api";
+import { UserInformation } from "../../features/user/UserInformation";
 
 const Home = () => {
   const [selectedOrganization, setSelectedOrganization] = useState({});
@@ -271,6 +272,7 @@ const Home = () => {
 
   return (
     <Container className="pt-10">
+      <UserInformation />
       <Grid container spacing={4}>
         <Grid item xs={8}>
           <ChooseOrganizationType />

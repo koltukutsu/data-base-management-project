@@ -16,6 +16,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 // api
 import api from '../../api';
+// redux
+import { useDispatch } from 'react-redux'
+import { login } from '../../features/user/userSlice'
 
 function Copyright(props) {
   return (
@@ -36,6 +39,7 @@ const defaultTheme = createTheme();
 
 export default function Authentication() {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -46,6 +50,7 @@ export default function Authentication() {
       const response = await api.authenticateUser(username, password);
       console.log(response)
       if (response.ok) {
+        dispatch(login(username))
         navigate("/home")
       } else {
         alert("Kullanıcı adı veya şifre hatalı")
