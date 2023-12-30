@@ -6,6 +6,7 @@ const {
     getOrganizations,
     addUser,
     deleteUser,
+    getCompanies,
     updateOffers,
     listAvailableOffers
 } = require('./database.js');
@@ -42,6 +43,16 @@ app.get('/organizations', async (req, res) => {
         res.json(result);
     } else {
         res.status(404).json({ message: 'No organizations found' });
+    }
+});
+
+app.get('/companies', async (req, res) => {
+    const result = await getCompanies();
+
+    if (result) {
+        res.json(result);
+    } else {
+        res.status(404).json({ message: 'No companies found' });
     }
 });
 

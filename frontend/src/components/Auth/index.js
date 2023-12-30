@@ -101,7 +101,7 @@ export default function Authentication() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              Giriş Yap
             </Button>
             {/* <Grid container>
               <Grid item xs>

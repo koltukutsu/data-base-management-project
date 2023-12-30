@@ -45,7 +45,7 @@ async function runQueries() {
 
             const viewQuery = "select * from company_view";
             const viewResult = await client.query(viewQuery);
-            console.log("Results:", viewResult.rows);
+            // console.log("Results:", viewResult.rows);
         } catch (err) {
             console.error("Error executing view-related queries", err);
         } finally {
@@ -55,7 +55,7 @@ async function runQueries() {
         try {
             const sqlQuery = "SELECT org_name FROM organizations";
             const sqlResult = await client.query(sqlQuery);
-            console.log("Results: ", sqlResult.rows);
+            // console.log("Results: ", sqlResult.rows);
         } catch (err) {
             console.error("Error executing additional query", err);
         } finally {
@@ -79,7 +79,7 @@ async function authenticateUser(userName, password) {
                 return null;
 
             } else {
-                console.log("Results: ", sqlResult.rows);
+                console.log("Database: authenticated");
                 return {
                     "status": true
                 };
@@ -100,7 +100,7 @@ async function getOrganizations(organizationName) {
         const client = await pool.connect();
         try {
             if (organizationName == null) {
-                const sqlQuery = `SELECT * FROM company_view`;
+                const sqlQuery = `SELECT * FROM organizations   `;
                 const sqlResult = await client.query(sqlQuery);
                 if (sqlResult.rows.length == 0) {
                     console.log("Database | getOrganizations(): No organization found");
@@ -108,7 +108,9 @@ async function getOrganizations(organizationName) {
                     return null;
                 }
                 else {
-                    console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
+                    console.log("Database | getOrganizations(): Organization Found");
+                    // console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
+
                     return sqlResult.rows;
                 }
             }
@@ -121,7 +123,33 @@ async function getOrganizations(organizationName) {
                 return null;
             }
             else {
-                console.log("Database | getOrganizations(): Organization Found.\nResults: ", sqlResult.rows);
+                console.log("Database | getOrganizations(): Organization Found.");
+                return sqlResult.rows;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+
+async function getCompanies() {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `SELECT * FROM companies`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                console.log(`Database | getCompanies(): No company found`);
+                return null;
+            }
+            else {
+                console.log("Database | getCompanies(): Company Found");
                 return sqlResult.rows;
             }
 
@@ -267,4 +295,4 @@ async function listAvailableOffers(userId) {
 // console.log(result);
 
 
-module.exports = { authenticateUser, getOrganizations, addUser, deleteUser, updateOffers, listAvailableOffers }
+module.exports = { authenticateUser, getOrganizations, getCompanies, addUser, deleteUser, updateOffers, listAvailableOffers }

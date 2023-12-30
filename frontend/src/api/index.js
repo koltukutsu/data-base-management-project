@@ -31,7 +31,17 @@ const api = {
             const endpoint = organizationName
                 ? `${BASE_URL}/organizations/${organizationName}`
                 : `${BASE_URL}/organizations`;
-
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
+    getCompanies: async () => {
+        try {
+            const endpoint = `${BASE_URL}/companies`;
+            console.log(endpoint)
             const response = await fetch(endpoint);
             const data = await response.json();
             return data;
