@@ -22,7 +22,7 @@ const Home = () => {
   const [selectedOrganization, setSelectedOrganization] = useState({});
   const [selectedCompany, setSelectedCompany] = useState({});
   const [selectedSeason, setSelectedSeason] = useState({});
-  const [selectedNumberOfPeople, setSelectedNumberOfPeople] = useState(0);
+  const [selectedNumberOfPeople] = useState(0);
 
   const [organizations, setOrganizations] = useState([]);
   const [companies, setCompanies] = useState([]);
