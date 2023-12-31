@@ -43,10 +43,10 @@ const Home = () => {
     setSelectedSeason(event.target.value);
   };
 
-  const handleSelectedNumberOfPeople = (event) => {
-    console.log("Here is the selected Number of People: ", event.target.value)
-    setSelectedNumberOfPeople(event.target.value);
-  };
+  // const handleSelectedNumberOfPeople = (event) => {
+  //   console.log("Here is the selected Number of People: ", event.target.value)
+  //   setSelectedNumberOfPeople(event.target.value);
+  // };
 
   const handleUserSpecialChoices = () => {
     console.log("Here is the selected Season: ", selectedSeason)
@@ -101,12 +101,12 @@ const Home = () => {
       </>
     );
   };
-  const OrganizationImages = () => {
-    return (
-      <>
-      </>
-    );
-  }
+  // const OrganizationImages = () => {
+  //   return (
+  //     <>
+  //     </>
+  //   );
+  // }
 
   const ChooseCompanyType = () => {
     return (

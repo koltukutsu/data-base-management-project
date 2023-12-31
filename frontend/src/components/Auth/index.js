@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -38,6 +39,10 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function Authentication() {
+  useEffect(() => {
+    document.title = "Parti Dünyası - Giriş";
+
+  });
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const handleSubmit = async (event) => {
@@ -54,6 +59,7 @@ export default function Authentication() {
         navigate("/home")
       } else {
         alert("Kullanıcı adı veya şifre hatalı")
+
         console.error('Failed to fetch data');
       }
     } catch (error) {
