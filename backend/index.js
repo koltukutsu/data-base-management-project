@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const {
     authenticateUser,
+    getUserInfo,
     getOrganizations,
     addUser,
     deleteUser,
@@ -29,9 +30,23 @@ app.post('/authenticate', async (req, res) => {
     const result = await authenticateUser(username, password);
 
     if (result) {
-        res.json(result.rows);
+        res.json(result);
     } else {
         res.status(401).json({ message: 'Authentication failed' });
+    }
+});
+
+// get user info
+app.get('/users/:userId', async (req, res) => {
+    console.log("GET /users/:userId - User Info")
+    const userId = req.params.userId;
+    const result = await getUserInfo(userId);
+
+    if (result) {
+        console.log(result)
+        res.json(result);
+    } else {
+        res.status(404).json({ message: 'User not found' });
     }
 });
 
@@ -70,11 +85,12 @@ app.get('/organizations/:organizationName', async (req, res) => {
 
 // Route for adding a user
 app.post('/users', async (req, res) => {
+    console.log("POST /users")
     const { username, password } = req.body;
     const result = await addUser(username, password);
 
     if (result) {
-        res.json({ message: 'User added successfully' });
+        res.json(result);
     } else {
         res.status(500).json({ message: 'Failed to add user' });
     }
@@ -107,7 +123,7 @@ app.put('/offers/:userId', async (req, res) => {
 app.get("/offers", async (req, res) => {
     const result = await listAvailableOffers(null);
     console.log("\tOnly offers")
-    console.log(result);
+    // console.log(result);
     if (result) {
         return res.json(result);
     } else {

@@ -3,14 +3,23 @@ import { createSlice } from '@reduxjs/toolkit'
 export const storeSlice = createSlice({
     name: 'user',
     initialState: {
-        value: "none",
+        userId: null,
+        username: "none",
+        wallet: 0,
+        acceptedOffers: 0
     },
     reducers: {
         login: (state, action) => {
-            state.value = action.payload
+            state.userId = action.payload.userId
+            state.username = action.payload.username
+            state.wallet = action.payload.wallet
+            state.acceptedOffers = action.payload.acceptedOffers
         },
         logout: (state) => {
-            state.value = "none"
+            state.userId = null
+            state.username = "none"
+            state.wallet = 0
+            state.acceptedOffers = 0
         }
     },
 })

@@ -26,6 +26,32 @@ const api = {
         }
     },
 
+    getUserInfo: async (userId) => {
+        try {
+            const response = await fetch(`${BASE_URL}/users/${userId}`);
+            const data = await response.json();
+            console.log("getUserInfo: ", data)
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
+
+    addUser: async (username, password) => {
+        try {
+            const response = await fetch(`${BASE_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+            // const data = await response.json();
+            return response;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
     getOrganizations: async (organizationName = null) => {
         try {
             const endpoint = organizationName
@@ -51,21 +77,7 @@ const api = {
         }
     },
 
-    addUser: async (username, password) => {
-        try {
-            const response = await fetch(`${BASE_URL}/users`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    },
+
 
     deleteUser: async (userId) => {
         try {

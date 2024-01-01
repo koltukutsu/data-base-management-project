@@ -7,66 +7,8 @@ const pool = new Pool({
     password: "semxhart",
     port: 3000, // default PostgreSQL port
 });
-
-async function runQueries() {
-    try {
-        const client = await pool.connect();
-        const organizationName = "Mezuniyet";
-        const viewName = "company_view";
-
-        try {
-            /* create company view and execute its query */
-
-            const checkViewQuery = `SELECT EXISTS (
-                SELECT 1
-                FROM information_schema.views
-                WHERE table_schema = 'public'
-                  AND table_name = '${viewName}'
-            );`;
-
-            const viewExistsResult = await client.query(checkViewQuery);
-            const viewExists = viewExistsResult.rows[0].exists;
-
-            if (viewExists) {
-                // View exists, so drop it before creating or replacing
-                const dropViewQuery = `DROP VIEW ${viewName};`;
-                await client.query(dropViewQuery);
-                console.log("View dropped successfully.");
-            }
-
-            const view = `CREATE OR REPLACE VIEW company_view AS
-              SELECT DISTINCT companies.comp_name AS comp_name, companies.id AS comp_id
-              FROM companies, organizations, fields
-              WHERE fields.comp_id = companies.id AND fields.comp_type = organizations.id
-              AND organizations.org_name = '${organizationName}'
-              ORDER BY comp_id;`;
-            await client.query(view);
-            console.log("View added successfully.");
-
-            const viewQuery = "select * from company_view";
-            const viewResult = await client.query(viewQuery);
-            // console.log("Results:", viewResult.rows);
-        } catch (err) {
-            console.error("Error executing view-related queries", err);
-        } finally {
-            client.release();
-        }
-
-        try {
-            const sqlQuery = "SELECT org_name FROM organizations";
-            const sqlResult = await client.query(sqlQuery);
-            // console.log("Results: ", sqlResult.rows);
-        } catch (err) {
-            console.error("Error executing additional query", err);
-        } finally {
-            pool.end();
-        }
-    } catch (err) {
-        console.error("Error connecting to the database", err);
-        process.exit(1);
-    }
-}
-
+//// AUTHENTICATION ////
+// 1.1 login
 async function authenticateUser(userName, password) {
     try {
         const client = await pool.connect();
@@ -80,9 +22,7 @@ async function authenticateUser(userName, password) {
 
             } else {
                 console.log("Database: authenticated");
-                return {
-                    "status": true
-                };
+                return sqlResult.rows;
             }
         } catch (err) {
             console.error("Error executing query", err);
@@ -95,6 +35,87 @@ async function authenticateUser(userName, password) {
 
 }
 
+async function getUserInfo(userId) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `SELECT * FROM getUserInfo($1)`;
+            const sqlResult = await client.query(sqlQuery, [userId]);
+
+            if (sqlResult.rows.length == 0) {
+                console.log("Database - getUserInfo(): No user found, return null");
+                return null;
+
+            } else {
+                console.log("Database: getUserInfo");
+                console.log(sqlQuery);
+                return sqlResult.rows;
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+// 1.1 add user | besides show user an alert that the trigger is run
+async function addUser(userName, password) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = {
+                text: 'INSERT INTO users (id, username, pw) VALUES (nextval($1), $2, $3) RETURNING id',
+                values: ['users_id_seq', userName, password],
+            };
+
+            const sqlResult = await client.query(sqlQuery);
+
+            if (sqlResult.rows.length === 0) {
+                return null;
+            } else {
+                const userId = sqlResult.rows[0].id;
+                console.log("Database | addUser(): ", userId)
+                return {
+                    id: userId,
+                };
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+// 1.3 delete user
+async function deleteUser(userId) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `DELETE FROM users WHERE id = ${userId}`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                return null;
+            }
+            else {
+                return true;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+//// MAIN PAGE ////
 async function getOrganizations(organizationName) {
     try {
         const client = await pool.connect();
@@ -163,54 +184,7 @@ async function getCompanies() {
     }
 }
 
-async function addUser(userName, password) {
-    try {
-        const client = await pool.connect();
-        try {
-            const sqlQuery = `INSERT INTO users (id, username, pw)
-            VALUES (nextval('users_id_seq'), ${userName}, ${password})`;
-            const sqlResult = await client.query(sqlQuery);
 
-            // TODO what does that query return?
-            if (sqlResult.rows.length == 0) {
-                return null;
-            }
-            else {
-                return true;
-            }
-
-        } catch (err) {
-            console.error("Error executing query", err);
-        } finally {
-            client.release();
-        }
-    } catch (err1) {
-        console.error("Error connecting to the database", err1);
-    }
-}
-
-async function deleteUser(userId) {
-    try {
-        const client = await pool.connect();
-        try {
-            const sqlQuery = `DELETE FROM users WHERE id = ${userId}`;
-            const sqlResult = await client.query(sqlQuery);
-            if (sqlResult.rows.length == 0) {
-                return null;
-            }
-            else {
-                return true;
-            }
-
-        } catch (err) {
-            console.error("Error executing query", err);
-        } finally {
-            client.release();
-        }
-    } catch (err1) {
-        console.error("Error connecting to the database", err1);
-    }
-}
 
 async function updateOffers(userId) {
     try {
@@ -295,4 +269,4 @@ async function listAvailableOffers(userId) {
 // console.log(result);
 
 
-module.exports = { authenticateUser, getOrganizations, getCompanies, addUser, deleteUser, updateOffers, listAvailableOffers }
+module.exports = { authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser, deleteUser, updateOffers, listAvailableOffers }

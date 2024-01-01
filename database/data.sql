@@ -309,50 +309,50 @@ INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALU
 ---------------------------------------------------------------------------------------------------------------------
 -- Inserting Data into Products Table --
 -- dogum gunu
-INSERT INTO products (id, product_name, product_type) VALUES (1, 'Dogum Gunu Pastasi', 1);
-INSERT INTO products (id, product_name, product_type) VALUES (2, 'Pasta Susu', 1);
-INSERT INTO products (id, product_name, product_type) VALUES (3, 'Parti Malzemeleri', 1);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (1, 'Dogum Gunu Pastasi', 100, 3, 1);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (2, 'Pasta Susu', 20, 3, 1);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (3, 'Parti Malzemeleri', 80, 3, 1);
 
 -- dugun
-INSERT INTO products (id, product_name, product_type) VALUES (4, 'Dugun Pastasi', 2);
-INSERT INTO products (id, product_name, product_type) VALUES (5, 'Muzik Grubu', 2);
-INSERT INTO products (id, product_name, product_type) VALUES (6, 'Yemek', 2);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (4, 'Dugun Pastasi', 400, 3, 2);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (5, 'Muzik Grubu', 300, 3, 2);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (6, 'Yemek', 300, 3, 2);
 
 -- mezuniyet
-INSERT INTO products (id, product_name, product_type) VALUES (7, 'Kep', 3);
-INSERT INTO products (id, product_name, product_type) VALUES (8, 'Yemek', 3);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (7, 'Kep', 90, 3, 3);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (8, 'Yemek', 200, 3, 3);
 
 -- yilbasi
-INSERT INTO products (id, product_name, product_type) VALUES (9, 'Yilbasi Agaci', 4);
-INSERT INTO products (id, product_name, product_type) VALUES (10, 'Parti Malzemeleri', 4);
-INSERT INTO products (id, product_name, product_type) VALUES (11, 'Sapka', 4);
-INSERT INTO products (id, product_name, product_type) VALUES (12, 'Yiyecek ve Icecek', 4);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (9, 'Yilbasi Agaci', 80, 3, 4);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (10, 'Parti Malzemeleri', 50, 3, 4);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (11, 'Sapka', 20, 3, 4);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (12, 'Yiyecek ve Icecek', 100, 3, 4);
 
 -- konser
-INSERT INTO products (id, product_name, product_type) VALUES (13, 'DJ', 5);
-INSERT INTO products (id, product_name, product_type) VALUES (14, 'Isikli Gosteri', 5);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (13, 'DJ', 500, 3, 5);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (14, 'Isikli Gosteri', 300, 3, 5);
 
 -- kostum partisi
-INSERT INTO products (id, product_name, product_type) VALUES (15, 'Kostum', 6);
-INSERT INTO products (id, product_name, product_type) VALUES (16, 'Atistirmalik', 6);
-INSERT INTO products (id, product_name, product_type) VALUES (17, 'Yiyecek ve Icecek', 6);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (15, 'Kostum', 100, 3, 6);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (16, 'Atistirmalik', 30, 3, 6);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (17, 'Yiyecek ve Icecek', 70, 3, 6);
 
 -- mangal partisi
-INSERT INTO products (id, product_name, product_type) VALUES (18, 'Yemek', 7);
-INSERT INTO products (id, product_name, product_type) VALUES (19, 'Mangal', 7);
-INSERT INTO products (id, product_name, product_type) VALUES (20, 'Yemek Malzemeleri', 7);
-INSERT INTO products (id, product_name, product_type) VALUES (21, 'YemekMasasi', 7);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (18, 'Yemek', 150, 3, 7);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (19, 'Mangal', 100, 3, 7);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (20, 'Yemek Malzemeleri', 90, 3, 7);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (21, 'Yemek Masasi', 50, 3, 7);
 
 --kamp
-INSERT INTO products (id, product_name, product_type) VALUES (22, 'Cadir', 8);
-INSERT INTO products (id, product_name, product_type) VALUES (23, 'Uyku Tulumu', 8);
-INSERT INTO products (id, product_name, product_type) VALUES (24, 'Kamp Malzemeleri', 8);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (22, 'Cadir', 600, 3, 8);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (23, 'Uyku Tulumu', 300, 3, 8);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (24, 'Kamp Malzemeleri', 300, 3, 8);
 
 -- yemekli toplanti
-INSERT INTO products (id, product_name, product_type) VALUES (25, 'Sunum Tahtasi', 9);
-INSERT INTO products (id, product_name, product_type) VALUES (26, 'Projesiyon', 9);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (25, 'Sunum Tahtasi', 100, 3, 9);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (26, 'Projeksiyon', 100, 3, 9);
 
 -- acik hava sinemasi
-INSERT INTO products (id, product_name, product_type) VALUES (27, 'Minder', 10);
-INSERT INTO products (id, product_name, product_type) VALUES (28, 'Yastik', 10);
-INSERT INTO products (id, product_name, product_type) VALUES (29, 'Sandalye', 10);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (27, 'Minder', 50, 3, 10);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (28, 'Yastik', 30, 3, 10);
+INSERT INTO products (id, product_name, price, stock, product_type) VALUES (29, 'Sandalye', 70, 3, 10);
