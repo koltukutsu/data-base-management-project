@@ -18,11 +18,25 @@ import {
 import api from "../../api";
 import { UserInformation } from "../../features/user/UserInformation";
 
+const organizationImages = {
+  1: "/images/birthday.png",
+  2: "/images/wedding.png",
+  3: "/images/graduation.png",
+  4: "/images/christmas.png",
+  5: "/images/concert.png",
+  6: "/images/costumes.png",
+  7: "/images/bbq.png",
+  8: "/images/camping.png",
+  9: "/images/diner_party.png",
+  10: "/images/cinema.png"
+}
+
+
 const Home = () => {
   const [selectedOrganization, setSelectedOrganization] = useState({});
   const [selectedCompany, setSelectedCompany] = useState({});
   const [selectedSeason, setSelectedSeason] = useState({});
-  const [selectedNumberOfPeople, setSelectedNumberOfPeople] = useState(0);
+  const [selectedNumberOfPeople] = useState(0);
 
   const [organizations, setOrganizations] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -33,10 +47,10 @@ const Home = () => {
     console.log("Here is the selected Organization: ", event.target.value)
     setSelectedOrganization(event.target.value);
   };
-  const handleSelectedCompany = (event) => {
-    console.log("Here is the selected Company: ", event.target.value)
-    setSelectedCompany(event.target.value);
-  };
+  // const handleSelectedCompany = (event) => {
+  //   console.log("Here is the selected Company: ", event.target.value)
+  //   setSelectedCompany(event.target.value);
+  // };
 
   const handleSelectedSeason = (event) => {
     console.log("Here is the selected Season: ", event.target.value)
@@ -74,78 +88,78 @@ const Home = () => {
     });
   }, []);
 
-  const ChooseOrganizationType = () => {
-    return (
-      <>
-        <Typography variant="h4" gutterBottom>
-          Parti Dünyası
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Organizasyon Çeşidi Seçiniz:
-        </Typography>
-        <Select
-          label="Bir tane seçiniz"
-          value={selectedOrganization}
-          onChange={handleSelectedOrganization}
-          fullWidth
-          sx={{ marginTop: 2 }}
-        >
-          {/* ORGANIZATION TYPES */}
-          {
-            organizations.map((organization) => (
-              <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
-            ))
-          }
-        </Select>
-
-      </>
-    );
-  };
-  // const OrganizationImages = () => {
+  // const ChooseOrganizationType = () => {
   //   return (
   //     <>
+  //       <Typography variant="h4" gutterBottom>
+  //         Parti Dünyası
+  //       </Typography>
+  //       <Typography variant="body1" paragraph>
+  //         Organizasyon Çeşidi Seçiniz:
+  //       </Typography>
+  //       <Select
+  //         label="Bir tane seçiniz"
+  //         value={selectedOrganization}
+  //         onChange={handleSelectedOrganization}
+  //         fullWidth
+  //         sx={{ marginTop: 2 }}
+  //       >
+  //         {/* ORGANIZATION TYPES */}
+  //         {
+  //           organizations.map((organization) => (
+  //             <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
+  //           ))
+  //         }
+  //       </Select>
+
+  //     </>
+  //   );
+  // };
+  const OrganizationImages = () => {
+    console.log("Chosen organization image: ", organizationImages[selectedOrganization.id])
+    return (
+      <img className="rounded-lg" src={organizationImages[selectedOrganization.id]} />
+    );
+  }
+
+  // const ChooseCompanyType = () => {
+  //   return (
+  //     <>
+  //       <Typography variant="h4" gutterBottom>
+  //         Şirketler
+  //       </Typography>
+  //       <Typography variant="body1" paragraph>
+  //         Şirket Çeşidi Seçiniz:
+  //       </Typography>
+  //       <Select
+  //         label="Bir tane seçiniz"
+  //         value={selectedCompany}
+
+  //         onChange={handleSelectedCompany}
+  //         fullWidth
+  //         sx={{ marginTop: 2 }}
+  //       >
+  //         {/* COMPANY TYPES */}
+  //         {
+  //           companies.map((company) => {
+  //             return (
+  //               <MenuItem key={company.id} value={company}>{company.comp_name}</MenuItem>
+  //             );
+  //           })
+  //         }
+  //       </Select>
+  //       <Button
+  //         type="submit"
+  //         fullWidth
+  //         variant="contained"
+  //         sx={{ mt: 3, mb: 2 }} onClick={() => {
+  //           setSelectedCompany({});
+  //           setSelectedOrganization({});
+  //         }}
+  //       > Temizle</Button>
   //     </>
   //   );
   // }
-
-  const ChooseCompanyType = () => {
-    return (
-      <>
-        <Typography variant="h4" gutterBottom>
-          Şirketler
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Şirket Çeşidi Seçiniz:
-        </Typography>
-        <Select
-          label="Bir tane seçiniz"
-          value={selectedCompany}
-
-          onChange={handleSelectedCompany}
-          fullWidth
-          sx={{ marginTop: 2 }}
-        >
-          {/* COMPANY TYPES */}
-          {
-            companies.map((company) => {
-              return (
-                <MenuItem key={company.id} value={company}>{company.comp_name}</MenuItem>
-              );
-            })
-          }
-        </Select>
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }} onClick={() => {
-            setSelectedCompany({});
-            setSelectedOrganization({});
-          }}
-        > Temizle</Button>
-      </>
-    );
-  }
   const AllOffersForTheOrganization = () => {
     // Assuming 'offers' state contains the data fetched from the API
     // Modify this according to your actual data structure
@@ -299,6 +313,29 @@ const Home = () => {
 
     return (
       <Box component="form" onSubmit={handleFormSubmit} noValidate sx={{ mt: 1 }}>
+        <Typography variant="h4" gutterBottom>
+          Parti Dünyası
+        </Typography>
+        <Typography variant="body1" paragraph>
+          Organizasyon Çeşidi Seçiniz:
+        </Typography>
+        <Select
+          label="Bir tane seçiniz"
+          value={selectedOrganization}
+          onChange={handleSelectedOrganization}
+          fullWidth
+          sx={{ marginTop: 0 }}
+        >
+          {/* ORGANIZATION TYPES */}
+          {
+            organizations.map((organization) => (
+              <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
+            ))
+          }
+        </Select>
+        <Typography variant="body1" paragraph sx={{ marginTop: 1 }}>
+          Şirket Çeşidi Seçiniz:
+        </Typography>
         <Select
           required
           fullWidth
@@ -308,7 +345,7 @@ const Home = () => {
           label="Mevsim Seçiniz"
           value={selectedSeason}
           onChange={handleSelectedSeason}
-          sx={{ marginTop: 2 }}
+          sx={{ marginTop: 0 }}
         >
           {companies.map((company) => (
             <MenuItem key={company.id} value={company}>
@@ -344,15 +381,15 @@ const Home = () => {
     <Container className="pt-10">
       <UserInformation />
       <Grid container spacing={4}>
+        <Grid item xs={4}>
+          <UserSpecialChoices />
+        </Grid>
         <Grid item xs={8}>
-          <ChooseOrganizationType />
+          <OrganizationImages />
         </Grid>
-        <Grid item xs={4}>
-          <ChooseCompanyType />
-        </Grid>
-        <Grid item xs={4}>
+        {/* <Grid item xs={4}>
           < UserSpecialChoices />
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <AllOffersForTheOrganization />
         </Grid>
