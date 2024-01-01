@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { login, logout } from './userSlice'
+import { login, logout, deleteAccount } from './userSlice'
 import { Typography, Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom';
 
@@ -12,8 +12,18 @@ export function UserInformation() {
     const navigate = useNavigate();
 
     const handleSubmit = () => {
-        navigate("/")
         dispatch(logout())
+        navigate("/")
+    }
+
+    const handleDelete = () => {
+        const isConfirmed = window.confirm('Are you sure you want to delete your account?');
+        if (isConfirmed) {
+            dispatch(deleteAccount())
+            dispatch(logout())
+            alert("Hesabınız silindi.")
+            navigate("/")
+        }
     }
     return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -29,6 +39,13 @@ export function UserInformation() {
                 onClick={handleSubmit}
             >
                 Çıkış Yap
+            </Button>
+            <Button
+                aria-label="Delete User"
+                onClick={handleDelete}
+                className='text-red-500'
+            >
+                Hesabı Sil
             </Button>
         </div>
     );

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import api from '../../api'
 
 export const storeSlice = createSlice({
     name: 'user',
@@ -20,11 +21,14 @@ export const storeSlice = createSlice({
             state.username = "none"
             state.wallet = 0
             state.acceptedOffers = 0
+        },
+        deleteAccount: (state) => {
+            api.deleteUser(state.userId)
         }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { login, logout } = storeSlice.actions
+export const { login, logout, deleteAccount } = storeSlice.actions
 
 export default storeSlice.reducer
