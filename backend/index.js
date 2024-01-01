@@ -8,8 +8,10 @@ const {
     addUser,
     deleteUser,
     getCompanies,
+    getSeasons,
     updateOffers,
     getOffersBasedOnOrganization,
+    getProductsBasedOnOrganization,
     listAvailableOffers
 } = require('./database.js');
 
@@ -63,16 +65,17 @@ app.get('/offersspecial/:organizationName', async (req, res) => {
     }
 });
 
-// route for getting all of organizations
-app.get('/organizations', async (req, res) => {
-    const result = await getOrganizations(null);
+// // route for getting all of organizations
+// app.get('/specialorganizations/:organizationName', async (req, res) => {
+//     const organizationName = req.params.organizationName;
+//     const result = await getProductsBasedOnOrganization(organizationName);
 
-    if (result) {
-        res.json(result);
-    } else {
-        res.status(404).json({ message: 'No organizations found' });
-    }
-});
+//     if (result) {
+//         res.json(result);
+//     } else {
+//         res.status(404).json({ message: 'No organizations found' });
+//     }
+// });
 
 app.get('/companies', async (req, res) => {
     const result = await getCompanies();
@@ -84,10 +87,22 @@ app.get('/companies', async (req, res) => {
     }
 });
 
-// Route for getting specific organizations
-app.get('/organizations/:organizationName', async (req, res) => {
+// get products based on the organization name
+app.get('/products/:organizationName', async (req, res) => {
     const organizationName = req.params.organizationName;
-    const result = await getOrganizations(organizationName);
+    const result = await getProductsBasedOnOrganization(organizationName);
+
+    if (result) {
+        res.json(result);
+    } else {
+        res.status(404).json({ message: 'Products are not found' });
+    }
+});
+
+
+// Route for getting specific organizations
+app.get('/organizations', async (req, res) => {
+    const result = await getOrganizations();
 
     if (result) {
         res.json(result);
@@ -122,9 +137,10 @@ app.delete('/users/:userId', async (req, res) => {
 });
 
 // Route for updating offers
-app.put('/offers/:userId', async (req, res) => {
+app.put('/offers/:userId/:offerId', async (req, res) => {
     const userId = req.params.userId;
-    const result = await updateOffers(userId);
+    const offerId = req.params.offerId;
+    const result = await updateOffers(userId, offerId);
 
     if (result) {
         res.json({ message: 'Offer updated successfully' });
@@ -133,9 +149,8 @@ app.put('/offers/:userId', async (req, res) => {
     }
 });
 
-app.get("/offers", async (req, res) => {
-    const result = await listAvailableOffers(null);
-    console.log("\tOnly offers")
+app.get("/seasons", async (req, res) => {
+    const result = await getSeasons();
     // console.log(result);
     if (result) {
         return res.json(result);
@@ -145,9 +160,11 @@ app.get("/offers", async (req, res) => {
 });
 
 // Route for listing available offers
-app.get('/offers/:userId', async (req, res) => {
-    const userId = req.params.userId;
-    const result = await listAvailableOffers(userId);
+app.get('/offers/:organizationName/:season/:amountOfPeople', async (req, res) => {
+    const organizationName = req.params.organizationName;
+    const season = req.params.season;
+    const amountOfPeople = req.params.amountOfPeople;
+    const result = await listAvailableOffers(organizationName, season, amountOfPeople);
 
     if (result) {
         res.json(result);

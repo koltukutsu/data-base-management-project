@@ -24,11 +24,14 @@ export const storeSlice = createSlice({
         },
         deleteAccount: (state) => {
             api.deleteUser(state.userId)
+        },
+        takeMoneyFromUserWallet: (state, action) => {
+            state.wallet -= action.payload.moneyAmount
         }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { login, logout, deleteAccount } = storeSlice.actions
+export const { login, logout, deleteAccount, takeMoneyFromUserWallet } = storeSlice.actions
 
 export default storeSlice.reducer

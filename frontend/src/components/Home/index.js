@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Typography,
   Box,
@@ -15,6 +16,7 @@ import {
   TableCell,
   TableBody,
 } from "@mui/material";
+import { takeMoneyFromUserWallet } from "../../features/user/userSlice";
 import api from "../../api";
 import { UserInformation } from "../../features/user/UserInformation";
 
@@ -35,13 +37,18 @@ const organizationImages = {
 const Home = () => {
   const [selectedOrganization, setSelectedOrganization] = useState({});
   const [selectedCompany, setSelectedCompany] = useState({});
-  const [selectedSeason, setSelectedSeason] = useState({});
-  const [selectedNumberOfPeople] = useState(0);
-
+  const [selectedSeason, setSelectedSeason] = useState(null);
+  const [selectedNumberOfPeople, setSelectedNumberOfPeople] = useState(0);
+  const [seasons, setSeasons] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [amountOfOffers, setAmountofOffers] = useState(0);
+  const userId = useSelector((state) => state.userLogger.userId);
+  const userWallet = useSelector((state) => state.userLogger.wallet);
+
+  const dispatch = useDispatch();
 
   const handleSelectedOrganization = (event) => {
     console.log("Here is the selected Organization: ", event.target.value)
@@ -69,30 +76,47 @@ const Home = () => {
   //   setSelectedNumberOfPeople(event.target.value);
   // };
 
-  const handleUserSpecialChoices = () => {
-    console.log("Here is the selected Season: ", selectedSeason)
-    console.log("Here is the selected Number of People: ", selectedNumberOfPeople)
-  }
+  // const handleUserSpecialChoices = (amountOfPeople) => {
+
+  // }
 
   useEffect(() => {
     document.title = "Parti Dünyası";
     api.welcomeMessage().then((data) => console.log(data.message));
+    // necessary
     api.getOrganizations().then((data) => {
-      console.log("API: Gotten Organizations")
+      console.log("API: Gotten Organizations", data)
       setOrganizations(data);
-      // return console.log(data);
+
     });
+    // not necessary
     api.getCompanies().then((data) => {
       console.log("API: Gotten Companies")
       setCompanies(data);
       // return console.log(data);
     });
-    api.listAvailableOffers().then((data) => {
-      console.log("API: Gotten Offers")
-      setOffers(data);
-      setAmountofOffers(data.length);
+    // api.listAvailableOffers().then((data) => {
+    //   console.log("API: Gotten Offers")
+    //   // setOffers(data);
+    //   // setAmountofOffers(data.length);
+
+    //   // set
+    //   const seasons = new Set();
+    //   data.forEach((offer) => {
+    //     // console.log("offer:", offer)
+    //     seasons.add(offer.time_period);
+    //   })
+    //   setSeasons([...seasons]);
+    //   console.log("Seasons: ", seasons)
+    //   // return console.log(data);
+    // });
+
+    api.getSeasons().then((data) => {
+      console.log("API: Gotten Seasons", data)
+      setSeasons(data);
       // return console.log(data);
     });
+
   }, []);
 
   // const ChooseOrganizationType = () => {
@@ -167,125 +191,86 @@ const Home = () => {
   //     </>
   //   );
   // }
-  const AllOffersForTheOrganization = () => {
+  const AllOffersForTheOrganizationAndCompany = () => {
     // Assuming 'offers' state contains the data fetched from the API
     // Modify this according to your actual data structure
 
     // Replace with actual column names from your API response
+
     const columns = [
-      "Teklif ID",
+      // "Teklif ID",
       "Şirket ID",
       "Organizasyon Türü",
       "Kabul Edildi",
       "Maksimum Misafir Sayısı",
       "Zaman Aralığı",
       "Fiyat",
-      "Kabul Eden Kullanıcı ID"
+      "Kabul Eden Kullanıcı ID",
+      "\t\t"
     ];
     const OfferRows = () => {
-      console.log(offers.length)
-      if (selectedOrganization.id && selectedCompany.id) {
-        const filteredOffers = offers.filter(
-          (offer) => (offer.org_type === selectedOrganization.id) && (offer.comp_id === selectedCompany.id)
-        )
-        setAmountofOffers(filteredOffers.length)
-        return filteredOffers
-          .map((offer) => {
-            return (
-              <TableRow key={offer.id}>
-                <TableCell>{offer.id}</TableCell>
-                <TableCell>{companies.find(
-                  (company) => company.id === offer.comp_id
-                ).comp_name}</TableCell>
-                <TableCell>
-                  {organizations.find((organization) => organization.id === offer.org_type).org_name}
-                </TableCell>
-                <TableCell>{offer.accepted}</TableCell>
-                <TableCell>{offer.max_guest_count}</TableCell>
-                <TableCell>{offer.time_period}</TableCell>
-                <TableCell>{offer.price}</TableCell>
-                <TableCell>{offer.accepted_by_id}</TableCell>
-              </TableRow>
-            );
+
+      const handleChosenCompanyOffer = (userId, offerId, offerPrice) => {
+        console.log("Here is the selected Company: ", selectedCompany)
+        const numericOfferPrice = parseFloat(offerPrice);
+        if (userWallet < numericOfferPrice) {
+          alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
+          return;
+        }
+        const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
+        if (!isConfirmed) {
+          api.updateOffers(userId, offerId).then((data) => {
+            console.log("API: updateOffers", offerId, data)
           })
-      } else if (selectedOrganization.id) {
-        const filteredOffers = offers.filter(
-          (offer) => (offer.org_type === selectedOrganization.id)
-        )
-        setAmountofOffers(filteredOffers.length)
+          const updatedOffersLocally = offers.map((offer) => {
 
-        return filteredOffers.map((offer) => {
-          return (
-            <TableRow key={offer.id}>
-              <TableCell>{offer.id}</TableCell>
-              <TableCell>{companies.find(
-                (company) => company.id === offer.comp_id
-              ).comp_name}</TableCell>
-              <TableCell>
-                {organizations.find((organization) => organization.id === offer.org_type).org_name}
-              </TableCell>
-              <TableCell>{offer.accepted}</TableCell>
-              <TableCell>{offer.max_guest_count}</TableCell>
-              <TableCell>{offer.time_period}</TableCell>
-              <TableCell>{offer.price}</TableCell>
-              <TableCell>{offer.accepted_by_id}</TableCell>
+            if (offer.id === offerId) {
+              offer.accepted = true;
+              offer.accepted_by_id = userId;
+            }
+            return offer;
+          })
+          // take money from user wallet
+          dispatch(takeMoneyFromUserWallet(numericOfferPrice))
 
-            </TableRow>
-          );
-        })
+          setOffers(updatedOffersLocally);
+        }
+      };
 
-      } else if (selectedCompany.id) {
-        const filteredOffers = offers.filter(
-          (offer) => (offer.comp_id === selectedCompany.id)
-        )
-        setAmountofOffers(filteredOffers.length)
-
-        return filteredOffers.map((offer) => {
-          return (
-            <TableRow key={offer.id}>
-              <TableCell>{offer.id}</TableCell>
-              <TableCell>{companies.find(
-                (company) => company.id === offer.comp_id
-              ).comp_name}</TableCell>
-              <TableCell>
-                {organizations.find((organization) => organization.id === offer.org_type).org_name}
-              </TableCell>
-              <TableCell>{offer.accepted}</TableCell>
-              <TableCell>{offer.max_guest_count}</TableCell>
-              <TableCell>{offer.time_period}</TableCell>
-              <TableCell>{offer.price}</TableCell>
-              <TableCell>{offer.accepted_by_id}</TableCell>
-            </TableRow>
-          );
-        });
+      if (!offers || !selectedOrganization || !selectedSeason) {
+        return null; // Add a check for undefined or null values
       }
-      else {
-        setAmountofOffers(offers.length)
-        return offers.map((offer) => {
-          return (
-            <TableRow key={offer.id}>
-              <TableCell>{offer.id}</TableCell>
-              <TableCell>{companies.find(
-                (company) => company.id === offer.comp_id
-              )?.comp_name}</TableCell>
-              <TableCell>
-                {organizations.find((organization) => organization.id === offer.org_type)?.org_name}
-              </TableCell>
-              <TableCell>{offer.accepted}</TableCell>
-              <TableCell>{offer.max_guest_count}</TableCell>
-              <TableCell>{offer.time_period}</TableCell>
-              <TableCell>{offer.price}</TableCell>
-              <TableCell>{offer.accepted_by_id}</TableCell>
-            </TableRow>
-          );
-        });
-      }
+      setAmountofOffers(offers.length)
+      return offers.map((offer) => {
+        // print every info related
+        // console.log("Offer: ", offer)
+
+
+        return (
+          <TableRow key={offer.id}>
+            {/* <TableCell>{offer.id}</TableCell> */}
+            <TableCell>{
+              offer.comp_name}</TableCell>
+            <TableCell>
+              {offer.org_name}
+            </TableCell>
+            <TableCell>{offer.accepted}</TableCell>
+            <TableCell>{offer.max_guest_count}</TableCell>
+            <TableCell>{offer.time_period}</TableCell>
+            <TableCell>{offer.price}</TableCell>
+            <TableCell>{offer.accepted_by_id}</TableCell>
+            <TableCell><Button onClick={() => handleChosenCompanyOffer(userId, offer.id, offer.price)}>Şirketi Seç</Button></TableCell>
+          </TableRow>
+        );
+      });
     }
-
+    if (offers === undefined) {
+      return null;
+    }
     return (
       <>
         <Typography variant="h4" gutterBottom>
-          Seçilen Organizasyon İçin Tüm Teklifler: {amountOfOffers}
+          Şirketler Teklifleri: {amountOfOffers}
         </Typography>
         {offers.length > 0 ? (
           <TableContainer>
@@ -311,75 +296,181 @@ const Home = () => {
     );
   };
 
-  const UserSpecialChoices = () => {
-    const handleFormSubmit = (e) => {
-      e.preventDefault();
+  const AllProductsForOrganization = () => {
+    const columns = ["Ürün İsmi",
+      "Ürün Fiyatı",
+      "Stok",
+      "\t\t\t"
+    ]
+    const ProductRows = () => {
+      return products.map((product) => {
 
-      handleUserSpecialChoices();
+        const handleChosenProductOffer = (userId, productName, productPrice) => {
+
+          const numericOfferPrice = parseFloat(productPrice);
+          if (userWallet < numericOfferPrice) {
+            alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
+            return;
+          }
+          const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
+          if (isConfirmed) {
+
+          }
+        }
+
+        return (
+          <TableRow key={product.productName}>
+            <TableCell>{product.productName}</TableCell>
+            <TableCell>{
+              product.price}</TableCell>
+            <TableCell>
+              {product.stock}
+            </TableCell>
+            <TableCell>
+              <Button onClick={() => handleChosenProductOffer(userId, product.productName, product.price)}>Ürünü Seç</Button></TableCell>
+          </TableRow>
+        );
+      })
+    }
+
+    return (
+      <>
+        <Typography variant="h4" gutterBottom>
+          Ürünler: {products.length}
+        </Typography>
+        {products.length > 0 ? (
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell key={column}>{column}</TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <ProductRows />
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography variant="body1" paragraph>
+            Henüz ürün yok
+          </Typography>
+        )}
+      </>
+    );
+  }
+
+  const UserSpecialChoices = () => {
+    const handleFormSubmit = () => {
+      console.log("Handle form submit for Special Choices")
+      console.log("Handle this Here is the selected Organization: ", selectedOrganization)
+      console.log("Here is the selected Season: ", selectedSeason)
+      console.log("Here is the selected Number of People: ", selectedNumberOfPeople)
+
+      api.getOffersBasedOnOrganization(selectedOrganization.org_name).then((data) => {
+        console.log("Taken; getOffersBasedOnOrganization()", data)
+        const amountOfOffers = data[0].offercount;
+        setAmountofOffers(amountOfOffers)
+        console.log("AMOUNT OF OFFERS:", amountOfOffers)
+        // return console.log(data);
+      })
+
+      // turn selectedNumberOfPoeple to number
+      const amountOfPeople = parseInt(selectedNumberOfPeople);
+
+      api.listAvailableOffers(selectedOrganization.org_name, selectedSeason, amountOfPeople).then((data) => {
+        console.log("Taken; listAvailableOffers()", data)
+        if (data.message === "No available offers found") {
+          alert("Bu tercihler için uygun teklif bulunamadı.")
+        }
+        else {
+          console.log("Taken; listAvailableOffers()", data)
+          setOffers(data);
+        }
+        // return console.log(data);
+      })
+
+      // take products
+      api.getProducts(selectedOrganization.org_name).then((data) => {
+        console.log("Taken; getProductsBasedOnOrganization()", data)
+        if (data.message === "Products are not found") {
+          setProducts(data);
+        } else {
+          alert("Bu tercihler için uygun ürün bulunamadı.")
+        }
+        // return console.log(data);
+      })
     };
 
     return (
-      <Box component="form" onSubmit={handleFormSubmit} noValidate sx={{ mt: 1 }}>
-        <Typography variant="h4" gutterBottom>
-          Parti Dünyası
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Organizasyon Çeşidi Seçiniz:
-        </Typography>
-        <Select
-          label="Bir tane seçiniz"
-          value={selectedOrganization}
-          onChange={handleSelectedOrganization}
-          fullWidth
-          sx={{ marginTop: 0 }}
-        >
-          {/* ORGANIZATION TYPES */}
-          {
-            organizations.map((organization) => (
-              <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
-            ))
-          }
-        </Select>
-        <Typography variant="body1" paragraph sx={{ marginTop: 1 }}>
-          Şirket Çeşidi Seçiniz:
-        </Typography>
-        <Select
-          required
-          fullWidth
-          margin="normal"
-          id="season"
-          name="season"
-          label="Mevsim Seçiniz"
-          value={selectedSeason}
-          onChange={handleSelectedSeason}
-          sx={{ marginTop: 0 }}
-        >
-          {companies.map((company) => (
-            <MenuItem key={company.id} value={company}>
-              {company.comp_name}
-            </MenuItem>
-          ))}
-        </Select>
+      <>
+        <Box noValidate sx={{ mt: 1 }}>
+          <Typography variant="h4" gutterBottom>
+            Parti Dünyası
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Organizasyon Çeşidi Seçiniz:
+          </Typography>
+          <Select
+            label="Bir tane seçiniz"
+            value={selectedOrganization}
+            onChange={(e) => handleSelectedOrganization(e)}
+            fullWidth
+            sx={{ marginTop: 0 }}
+          >
+            {
+              organizations.map((organization) => (
+                <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
+              ))
+            }
+          </Select>
+          <Typography variant="body1" paragraph sx={{ marginTop: 1 }}>
+            Sezon Seçiniz:
+          </Typography>
+          <Select
+            required
+            fullWidth
+            margin="normal"
+            id="season"
+            name="season"
+            label="Mevsim Seçiniz"
+            value={selectedSeason}
+            onChange={(e) => handleSelectedSeason(e)}
+            sx={{ marginTop: 0 }}
+          >
+            {seasons.map((season) => (
+              <MenuItem key={season.seasons} value={season.seasons}>
+                {season.seasons}
+              </MenuItem>
+            ))}
+          </Select>
 
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          type="number"
-          id="amountOfPeople"
-          label="İnsan Sayısı Giriniz"
-          name="amountOfPeople"
-          autoFocus
-        />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            // make it string
+            // type=""
+            id="poeple"
+            label="İnsan Sayısı Giriniz"
+            name="people"
+            value={selectedNumberOfPeople}
+            onChange={(e) => setSelectedNumberOfPeople(e.target.value)}
+            autoFocus
+          />
+
+        </Box>
         <Button
-          type="submit"
+          // type="submit"
           fullWidth
           variant="contained"
+          onClick={handleFormSubmit}
           sx={{ mt: 3, mb: 2 }}
         >
           Teklif Al
-        </Button>
-      </Box>
+        </Button></>
     );
   };
 
@@ -398,7 +489,10 @@ const Home = () => {
           < UserSpecialChoices />
         </Grid> */}
         <Grid item xs={12}>
-          <AllOffersForTheOrganization />
+          <AllOffersForTheOrganizationAndCompany />
+        </Grid>
+        <Grid item xs={12}>
+          <AllProductsForOrganization />
         </Grid>
       </Grid>
     </Container>

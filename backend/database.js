@@ -121,7 +121,7 @@ async function getOrganizations(organizationName) {
         const client = await pool.connect();
         try {
             if (organizationName == null) {
-                const sqlQuery = `SELECT * FROM organizations   `;
+                const sqlQuery = `SELECT * FROM organizations`;
                 const sqlResult = await client.query(sqlQuery);
                 if (sqlResult.rows.length == 0) {
                     console.log("Database | getOrganizations(): No organization found");
@@ -164,7 +164,7 @@ async function getOffersBasedOnOrganization(organizationName) {
     try {
         const client = await pool.connect();
         try {
-            const sqlQuery = ` * from offerCount($1)`
+            const sqlQuery = `select * from offerCount($1)`
             const sqlResult = await client.query(sqlQuery, [organizationName]);
             if (sqlResult.rows.length == 0) {
                 console.log(`Database | getOffersBasedOnOrganization(): No offer found in name ${organizationName}`);
@@ -173,6 +173,7 @@ async function getOffersBasedOnOrganization(organizationName) {
             }
             else {
                 console.log("Database | getOffersBasedOnOrganization(): Offer Found.");
+                console.log("\t\t", sqlResult.rows)
                 return sqlResult.rows;
             }
         } catch (err) {
@@ -182,6 +183,71 @@ async function getOffersBasedOnOrganization(organizationName) {
         console.error("Error connecting to the database", err1);
     }
 }
+
+// 2.3 get products baeed on the organizations
+
+async function getProductsBasedOnOrganization(organizationName) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `select * from getProductsInStock($1)`;
+            const sqlResult = await client.query(sqlQuery, [organizationName]);
+            if (sqlResult.rows.length == 0) {
+                console.log(`Database | getProductsBasedOnOrganization(): No product found in name ${organizationName}`);
+                console.log("No product found");
+                return null;
+            }
+            else {
+                console.log("Database | getProductsBasedOnOrganization(): Product Found.");
+                // (productName, amount, stock) turn this string to a related object 
+                console.log("\t\t", sqlResult.rows)
+                const products = sqlResult.rows[0].getproductsinstock.split(")\",")
+                return products.map((product) => {
+                    const productInfo = product.split(",")
+                    return {
+                        productName: productInfo[0].replace(/\\_\(\{\}\)/g, ""),
+                        price: productInfo[1].replace(/\\_\(\{\}\)/g, ""),
+                        stock: productInfo[2].replace(/\\_\(\{\}\)/g, "")
+                    }
+                })
+
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
+async function udpateUserBalance(userId, productId, newBalance, newStock) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `UPDATE balance
+SET amount = $3
+WHERE user_id = $1;
+UPDATE products
+SET stock = $4
+WHERE id = $2`
+            const sqlResult = await client.query(sqlQuery, [userId, productId, newBalance, newStock]);
+            if (sqlResult.rows.length == 0) {
+                console.log(`Database | udpateUserBalance(): No user found in name ${userId}`);
+                console.log("No user found");
+                return null;
+            }
+            else {
+                console.log("Database | udpateUserBalance(): User Found.");
+                return true;
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
+
 
 async function getCompanies() {
     try {
@@ -210,66 +276,76 @@ async function getCompanies() {
 
 
 
-async function updateOffers(userId) {
+async function updateOffers(userId, offersId) {
     try {
         const client = await pool.connect();
         try {
-            const sqlQuery = `UPDATE offers SET accepted = 'TRUE', accepted_by_id = ${userId} WHERE id = ${id}`;
-            const sqlResult = await client.query(sqlQuery);
-            if (sqlResult.rows.length == 0) {
-                return null;
-            }
-            else {
-                return sqlResult;
+            const sqlQuery = `UPDATE offers SET accepted = 'TRUE', accepted_by_id = $1 WHERE id = $2`;
+            const sqlResult = await client.query(sqlQuery, [userId, offersId]);
+
+            if (sqlResult.rowCount === 0) {
+                console.log("No rows were affected by the update");
+                return false; // or throw an error if you prefer
+            } else {
+                console.log("Update offers: Rows affected", sqlResult.rowCount);
+                return true; // or any meaningful response
             }
 
         } catch (err) {
             console.error("Error executing query", err);
+            throw err; // or return an error object
         } finally {
             client.release();
         }
     } catch (err1) {
         console.error("Error connecting to the database", err1);
+        throw err1; // or return an error object
     }
 }
 
-async function listAvailableOffers(userId) {
+
+async function listAvailableOffers(organizationName, season, amoungOfPeople) {
     try {
         console.log("Getting data from database");
         const client = await pool.connect();
         try {
-            console.log("2 Getting data from database");
-
-            if (userId == null) {
-                console.log("3 Getting data from database");
-                const sqlQuery = `SELECT *
-                FROM offers;
-                `;
-
-                const sqlResult = await client.query(sqlQuery);
-                // console.log(sqlResult);
-                if (sqlResult.rows.length === 0) {
-                    return null;
-                } else {
-                    return sqlResult.rows;
-                }
-            }
-
             const sqlQuery = `
-                SELECT DISTINCT *
-                FROM company_view
-                WHERE org_name = $1
-                INTERSECT
-                SELECT companies.comp_name, organizations.org_name
-                FROM companies
-                         JOIN offers ON companies.id = offers.comp_id
-                         JOIN organizations ON offers.org_type = organizations.id
-                WHERE organizations.org_name = $1
-                  AND offers.accepted = 'FALSE'
-                GROUP BY companies.comp_name
-                HAVING COUNT(offers.comp_id) > 0
+            SELECT DISTINCT *
+            FROM offer_view
+            WHERE org_name = $1
+                AND time_period = $2
+                AND max_guest_count >= $3
+            INTERSECT
+            SELECT DISTINCT companies.comp_name,
+                offers.time_period,
+                offers.max_guest_count,
+                offers.price,
+                org_name
+            FROM companies,
+                offers,
+                organizations,
+                fields
+            WHERE companies.comp_name IN (
+                    SELECT DISTINCT comp_name
+                    FROM fields,
+                        companies,
+                        organizations,
+                        offers
+                    WHERE fields.comp_id = companies.id
+                        AND fields.comp_type = organizations.id
+                        AND offers.comp_id = companies.id
+                        AND organizations.org_name = $1
+                        AND offers.accepted = 'FALSE'
+                    GROUP BY comp_name
+                    HAVING COUNT(offers.comp_id) > 0
+                )
+                AND fields.comp_id = companies.id
+                AND fields.comp_type = organizations.id
+                AND offers.org_type = organizations.id
+                AND offers.comp_id = companies.id
+                AND organizations.org_name = $1;
             `;
-            const sqlResult = await client.query(sqlQuery, [userId]);
+            const sqlResult = await client.query(sqlQuery, [organizationName, season, amoungOfPeople]);
 
             if (sqlResult.rows.length === 0) {
                 return null;
@@ -286,6 +362,30 @@ async function listAvailableOffers(userId) {
     }
 }
 
+async function getSeasons() {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = `SELECT DISTINCT(time_period) AS seasons FROM offers`;
+            const sqlResult = await client.query(sqlQuery);
+            if (sqlResult.rows.length == 0) {
+                console.log(`Database | getSeasons(): No season found`);
+                return null;
+            }
+            else {
+                console.log("Database | getSeasons(): Seasons Found");
+                return sqlResult.rows;
+            }
+
+        } catch (err) {
+            console.error("Error executing query", err);
+        } finally {
+            client.release();
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
 // // Example usage:
 // const userId = 'someUserId';
 // const userInput = 'someOrgName';
@@ -294,6 +394,7 @@ async function listAvailableOffers(userId) {
 
 
 module.exports = {
-    authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser,
+    authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser, udpateUserBalance,
+    getSeasons, getProductsBasedOnOrganization,
     getOffersBasedOnOrganization, deleteUser, updateOffers, listAvailableOffers
 }

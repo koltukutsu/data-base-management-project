@@ -88,6 +88,17 @@ const api = {
         }
     },
 
+    getProducts: async (organizationName) => {
+        try {
+            const endpoint = `${BASE_URL}/products/${organizationName}`;
+            console.log(endpoint)
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
 
 
     deleteUser: async (userId) => {
@@ -102,9 +113,9 @@ const api = {
         }
     },
 
-    updateOffers: async (userId) => {
+    updateOffers: async (userId, offerId) => {
         try {
-            const response = await fetch(`${BASE_URL}/offers/${userId}`, {
+            const response = await fetch(`${BASE_URL}/offers/${userId}/${offerId}`, {
                 method: 'PUT'
             });
             const data = await response.json();
@@ -114,19 +125,29 @@ const api = {
         }
     },
 
-    listAvailableOffers: async (userId = null) => {
+    listAvailableOffers: async (organizationName, season, amountOfPeople) => {
         try {
-            const endpoint = userId
-                ? `${BASE_URL}/offers/${userId}`
-                : `${BASE_URL}/offers`;
+            console.log("listAvailableOffers: ", organizationName, season, amountOfPeople)
+            const endpoint = `${BASE_URL}/offers/${organizationName}/${season}/${amountOfPeople}`;
+            const response = await fetch(endpoint);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error in listing available offers:', error);
+        }
+    },
 
+    getSeasons: async () => {
+        try {
+            const endpoint = `${BASE_URL}/seasons`;
+            console.log(endpoint)
             const response = await fetch(endpoint);
             const data = await response.json();
             return data;
         } catch (error) {
             console.error('Error:', error);
         }
-    }
+    },
 };
 
 export default api;

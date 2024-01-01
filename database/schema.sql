@@ -156,6 +156,7 @@ $$ LANGUAGE plpgsql;
 -- Function (record ve cursor içeren - stokta bulunan ürünleri listeler)
 DROP TYPE IF EXISTS product_info CASCADE;
 CREATE TYPE product_info AS (product_name VARCHAR(50), price INT, stock INT);
+
 CREATE OR REPLACE FUNCTION getProductsInStock(organizationName organizations.org_name %TYPE) RETURNS product_info [] AS $$
 DECLARE stock_cursor CURSOR FOR
 SELECT product_name,
