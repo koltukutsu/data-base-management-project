@@ -45,6 +45,13 @@ const Home = () => {
 
   const handleSelectedOrganization = (event) => {
     console.log("Here is the selected Organization: ", event.target.value)
+    api.getOffersBasedOnOrganization(event.target.value.org_name).then((data) => {
+      console.log("Taken; getOffersBasedOnOrganization()", data)
+      const amountOfOffers = data.offercount;
+      setAmountofOffers(amountOfOffers)
+      // return console.log(data);
+    })
+
     setSelectedOrganization(event.target.value);
   };
   // const handleSelectedCompany = (event) => {

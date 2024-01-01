@@ -158,6 +158,30 @@ async function getOrganizations(organizationName) {
     }
 }
 
+// 2.2. get offers based on the organization choice
+
+async function getOffersBasedOnOrganization(organizationName) {
+    try {
+        const client = await pool.connect();
+        try {
+            const sqlQuery = ` * from offerCount($1)`
+            const sqlResult = await client.query(sqlQuery, [organizationName]);
+            if (sqlResult.rows.length == 0) {
+                console.log(`Database | getOffersBasedOnOrganization(): No offer found in name ${organizationName}`);
+                console.log("No offer found");
+                return null;
+            }
+            else {
+                console.log("Database | getOffersBasedOnOrganization(): Offer Found.");
+                return sqlResult.rows;
+            }
+        } catch (err) {
+            console.error("Error executing query", err);
+        }
+    } catch (err1) {
+        console.error("Error connecting to the database", err1);
+    }
+}
 
 async function getCompanies() {
     try {
@@ -269,4 +293,7 @@ async function listAvailableOffers(userId) {
 // console.log(result);
 
 
-module.exports = { authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser, deleteUser, updateOffers, listAvailableOffers }
+module.exports = {
+    authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser,
+    getOffersBasedOnOrganization, deleteUser, updateOffers, listAvailableOffers
+}

@@ -52,6 +52,17 @@ const api = {
             console.error('Error:', error);
         }
     },
+
+    getOffersBasedOnOrganization: async (organizationName) => {
+        try {
+            const response = await fetch(`${BASE_URL}/offersspecial/${organizationName}`);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
+
     getOrganizations: async (organizationName = null) => {
         try {
             const endpoint = organizationName

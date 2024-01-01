@@ -9,6 +9,7 @@ const {
     deleteUser,
     getCompanies,
     updateOffers,
+    getOffersBasedOnOrganization,
     listAvailableOffers
 } = require('./database.js');
 
@@ -47,6 +48,18 @@ app.get('/users/:userId', async (req, res) => {
         res.json(result);
     } else {
         res.status(404).json({ message: 'User not found' });
+    }
+});
+
+// get offers based on organization name
+app.get('/offersspecial/:organizationName', async (req, res) => {
+    const organizationName = req.params.organizationName;
+    const result = await getOffersBasedOnOrganization(organizationName);
+
+    if (result) {
+        res.json(result);
+    } else {
+        res.status(404).json({ message: 'No offers found' });
     }
 });
 
