@@ -53,9 +53,9 @@ const api = {
         }
     },
 
-    getOffersBasedOnOrganization: async (organizationName) => {
+    getOffersBasedOnOrganization: async (organizationName, season, amountOfPeople) => {
         try {
-            const response = await fetch(`${BASE_URL}/offersspecial/${organizationName}`);
+            const response = await fetch(`${BASE_URL}/offersspecial/${organizationName}/${season}/${amountOfPeople}`);
             const data = await response.json();
             return data;
         } catch (error) {

@@ -52,12 +52,12 @@ const Home = () => {
 
   const handleSelectedOrganization = (event) => {
     console.log("Here is the selected Organization: ", event.target.value)
-    api.getOffersBasedOnOrganization(event.target.value.org_name).then((data) => {
-      console.log("Taken; getOffersBasedOnOrganization()", data)
-      const amountOfOffers = data.offercount;
-      setAmountofOffers(amountOfOffers)
-      // return console.log(data);
-    })
+    // api.getOffersBasedOnOrganization(event.target.value.org_name).then((data) => {
+    //   console.log("Taken; getOffersBasedOnOrganization()", data)
+    //   const amountOfOffers = data.offercount;
+    //   setAmountofOffers(amountOfOffers)
+    //   // return console.log(data);
+    // })
 
     setSelectedOrganization(event.target.value);
   };
@@ -198,14 +198,15 @@ const Home = () => {
     // Replace with actual column names from your API response
 
     const columns = [
-      // "Teklif ID",
-      "Şirket ID",
-      "Organizasyon Türü",
-      "Kabul Edildi",
-      "Maksimum Misafir Sayısı",
-      "Zaman Aralığı",
+      "Teklif ID",
+      // "Şirket ID",
+      // "Organizasyon Türü",
+      // "Kabul Edildi",
+      "Şirket Adı",
+      // "Maksimum Misafir Sayısı",
+      // "Zaman Aralığı",
       "Fiyat",
-      "Kabul Eden Kullanıcı ID",
+      // "Kabul Eden Kullanıcı ID",
       "\t\t"
     ];
     const OfferRows = () => {
@@ -249,16 +250,19 @@ const Home = () => {
         return (
           <TableRow key={offer.id}>
             {/* <TableCell>{offer.id}</TableCell> */}
-            <TableCell>{
+            {/* <TableCell>{
               offer.comp_name}</TableCell>
             <TableCell>
               {offer.org_name}
-            </TableCell>
-            <TableCell>{offer.accepted}</TableCell>
-            <TableCell>{offer.max_guest_count}</TableCell>
-            <TableCell>{offer.time_period}</TableCell>
+            </TableCell> */}
+            {/* <TableCell>{offer.accepted}</TableCell> */}
+            {/* <TableCell>{offer.max_guest_count}</TableCell> */}
+            {/* <TableCell>{offer.time_period}</TableCell> */}
+            {/* <TableCell>{offer.price}</TableCell> */}
+            <TableCell>{offer.offerid}</TableCell>
+            <TableCell>{offer.comp_name}</TableCell>
             <TableCell>{offer.price}</TableCell>
-            <TableCell>{offer.accepted_by_id}</TableCell>
+            {/* <TableCell>{offer.accepted_by_id}</TableCell> */}
             <TableCell><Button onClick={() => handleChosenCompanyOffer(userId, offer.id, offer.price)}>Şirketi Seç</Button></TableCell>
           </TableRow>
         );
@@ -297,9 +301,11 @@ const Home = () => {
   };
 
   const AllProductsForOrganization = () => {
-    const columns = ["Ürün İsmi",
-      "Ürün Fiyatı",
+    const columns = [
+      "Ürün ID",
+      "Ürün İsmi",
       "Stok",
+      "Ürün Fiyatı",
       "\t\t\t"
     ]
     const ProductRows = () => {
@@ -320,12 +326,13 @@ const Home = () => {
 
         return (
           <TableRow key={product.productName}>
+            <TableCell>{product.productId}</TableCell>
             <TableCell>{product.productName}</TableCell>
-            <TableCell>{
-              product.price}</TableCell>
             <TableCell>
               {product.stock}
             </TableCell>
+            <TableCell>{
+              product.price}</TableCell>
             <TableCell>
               <Button onClick={() => handleChosenProductOffer(userId, product.productName, product.price)}>Ürünü Seç</Button></TableCell>
           </TableRow>
@@ -368,8 +375,9 @@ const Home = () => {
       console.log("Handle this Here is the selected Organization: ", selectedOrganization)
       console.log("Here is the selected Season: ", selectedSeason)
       console.log("Here is the selected Number of People: ", selectedNumberOfPeople)
+      const amountOfPeople = parseInt(selectedNumberOfPeople);
 
-      api.getOffersBasedOnOrganization(selectedOrganization.org_name).then((data) => {
+      api.getOffersBasedOnOrganization(selectedOrganization.org_name, selectedSeason, amountOfPeople).then((data) => {
         console.log("Taken; getOffersBasedOnOrganization()", data)
         const amountOfOffers = data[0].offercount;
         setAmountofOffers(amountOfOffers)
@@ -378,7 +386,6 @@ const Home = () => {
       })
 
       // turn selectedNumberOfPoeple to number
-      const amountOfPeople = parseInt(selectedNumberOfPeople);
 
       api.listAvailableOffers(selectedOrganization.org_name, selectedSeason, amountOfPeople).then((data) => {
         console.log("Taken; listAvailableOffers()", data)
@@ -396,9 +403,9 @@ const Home = () => {
       api.getProducts(selectedOrganization.org_name).then((data) => {
         console.log("Taken; getProductsBasedOnOrganization()", data)
         if (data.message === "Products are not found") {
-          setProducts(data);
-        } else {
           alert("Bu tercihler için uygun ürün bulunamadı.")
+        } else {
+          setProducts(data);
         }
         // return console.log(data);
       })

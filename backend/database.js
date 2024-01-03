@@ -160,14 +160,14 @@ async function getOrganizations(organizationName) {
 
 // 2.2. get offers based on the organization choice
 
-async function getOffersBasedOnOrganization(organizationName) {
+async function getOffersBasedOnOrganization(organizationName, season, amoungOfPeople) {
     try {
         const client = await pool.connect();
         try {
-            const sqlQuery = `select * from offerCount($1)`
-            const sqlResult = await client.query(sqlQuery, [organizationName]);
+            const sqlQuery = `select * from offerCount($1, $2, $3)`
+            const sqlResult = await client.query(sqlQuery, [organizationName, season, amoungOfPeople]);
             if (sqlResult.rows.length == 0) {
-                console.log(`Database | getOffersBasedOnOrganization(): No offer found in name ${organizationName}`);
+                console.log(`Database | getOffersBasedOnOrganization(): No offer found in name ${organizationName}, ${season}, ${amoungOfPeople}`);
                 console.log("No offer found");
                 return null;
             }
@@ -204,11 +204,15 @@ async function getProductsBasedOnOrganization(organizationName) {
                 const products = sqlResult.rows[0].getproductsinstock.split(")\",")
                 return products.map((product) => {
                     const productInfo = product.split(",")
-                    return {
-                        productName: productInfo[0].replace(/\\_\(\{\}\)/g, ""),
-                        price: productInfo[1].replace(/\\_\(\{\}\)/g, ""),
-                        stock: productInfo[2].replace(/\\_\(\{\}\)/g, "")
+                    console.log(productInfo)
+                    const productObject = {
+                        productId: productInfo[0].replace(/[^a-zA-Z0-9\s]/g, ""),
+                        productName: productInfo[1].replace(/[^a-zA-Z0-9\s]/g, ""),
+                        price: productInfo[2].replace(/[^a-zA-Z0-9\s]/g, ""),
+                        stock: productInfo[3].replace(/[^a-zA-Z0-9\s]/g, "")
                     }
+                    console.log(productObject)
+                    return productObject
                 })
 
             }
@@ -309,42 +313,58 @@ async function listAvailableOffers(organizationName, season, amoungOfPeople) {
         console.log("Getting data from database");
         const client = await pool.connect();
         try {
+            // const sqlQuery = `
+            // SELECT DISTINCT *
+            // FROM offer_view
+            // WHERE org_name = $1
+            //     AND time_period = $2
+            //     AND max_guest_count >= $3
+            // INTERSECT
+            // SELECT DISTINCT companies.comp_name,
+            //     offers.time_period,
+            //     offers.max_guest_count,
+            //     offers.price,
+            //     org_name
+            // FROM companies,
+            //     offers,
+            //     organizations,
+            //     fields
+            // WHERE companies.comp_name IN (
+            //         SELECT DISTINCT comp_name
+            //         FROM fields,
+            //             companies,
+            //             organizations,
+            //             offers
+            //         WHERE fields.comp_id = companies.id
+            //             AND fields.comp_type = organizations.id
+            //             AND offers.comp_id = companies.id
+            //             AND organizations.org_name = $1
+            //             AND offers.accepted = 'FALSE'
+            //         GROUP BY comp_name
+            //         HAVING COUNT(offers.comp_id) > 0
+            //     )
+            //     AND fields.comp_id = companies.id
+            //     AND fields.comp_type = organizations.id
+            //     AND offers.org_type = organizations.id
+            //     AND offers.comp_id = companies.id
+            //     AND organizations.org_name = $1;
+            // `;
             const sqlQuery = `
-            SELECT DISTINCT *
+            SELECT MIN(offer_view.id) as offerid, comp_name,
+            MIN(price) as price
             FROM offer_view
             WHERE org_name = $1
-                AND time_period = $2
-                AND max_guest_count >= $3
-            INTERSECT
-            SELECT DISTINCT companies.comp_name,
-                offers.time_period,
-                offers.max_guest_count,
-                offers.price,
-                org_name
-            FROM companies,
-                offers,
-                organizations,
-                fields
-            WHERE companies.comp_name IN (
-                    SELECT DISTINCT comp_name
-                    FROM fields,
-                        companies,
-                        organizations,
-                        offers
-                    WHERE fields.comp_id = companies.id
-                        AND fields.comp_type = organizations.id
-                        AND offers.comp_id = companies.id
-                        AND organizations.org_name = $1
-                        AND offers.accepted = 'FALSE'
-                    GROUP BY comp_name
-                    HAVING COUNT(offers.comp_id) > 0
-                )
-                AND fields.comp_id = companies.id
-                AND fields.comp_type = organizations.id
-                AND offers.org_type = organizations.id
-                AND offers.comp_id = companies.id
-                AND organizations.org_name = $1;
-            `;
+            AND time_period = $2
+            AND max_guest_count >= $3
+            GROUP BY(comp_name)
+            EXCEPT
+            SELECT MIN(ow.id), comp_name,
+            MIN(ow.price)
+            FROM offer_view ow,
+            offers
+            WHERE offers.accepted = 'TRUE'
+            AND offers.id = ow.id
+            GROUP BY(comp_name);`
             const sqlResult = await client.query(sqlQuery, [organizationName, season, amoungOfPeople]);
 
             if (sqlResult.rows.length === 0) {

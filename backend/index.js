@@ -54,9 +54,11 @@ app.get('/users/:userId', async (req, res) => {
 });
 
 // get offers based on organization name
-app.get('/offersspecial/:organizationName', async (req, res) => {
+app.get('/offersspecial/:organizationName/:season/:amountOfPeople', async (req, res) => {
     const organizationName = req.params.organizationName;
-    const result = await getOffersBasedOnOrganization(organizationName);
+    const season = req.params.season;
+    const amountOfPeople = req.params.amountOfPeople;
+    const result = await getOffersBasedOnOrganization(organizationName, season, amountOfPeople);
 
     if (result) {
         res.json(result);
