@@ -291,7 +291,7 @@ INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALU
 INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALUES (7, 9, 20, 'Yaz', 3000.00);
 INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALUES (7, 9, 20, 'Kis', 2000.00);
 
---acikhavasineması
+--acik hava sineması
 INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALUES (2, 10, 50, 'Yaz', 3000.00);
 INSERT INTO offers (comp_id, org_type, max_guest_count, time_period, price) VALUES (2, 10, 100, 'Yaz', 3500.00);
 

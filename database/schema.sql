@@ -71,9 +71,11 @@ FROM companies,
 WHERE fields.comp_id = companies.id
     AND fields.comp_type = organizations.id
 ORDER BY companies.comp_name;
--- View (tüm teklif kombinasyonlarını listeler (intersect ile sadece açıktaki teklifler olacak şekilde sorgu yapılacak))
+-- View (tüm teklifleri listeler (intersect ile sadece açıktaki teklifler olacak şekilde sorgu yapılacak))
+DROP VIEW IF EXISTS offer_view;
 CREATE OR REPLACE VIEW offer_view AS
-SELECT DISTINCT companies.comp_name,
+SELECT offers.id,
+    companies.comp_name,
     offers.time_period,
     offers.max_guest_count,
     offers.price,
@@ -85,6 +87,7 @@ FROM companies,
 WHERE fields.comp_id = companies.id
     AND fields.comp_type = organizations.id
     AND offers.org_type = organizations.id
+    AND offers.comp_id = companies.id
 ORDER BY companies.comp_name;
 -- Trigger (kullanıcı silinirse kabul ettiği teklifler tekrar kullanıma açılır)
 DROP TRIGGER IF EXISTS user_delete_trigger ON users;
@@ -112,17 +115,33 @@ CREATE TRIGGER insert_into_balance_trigger
 AFTER
 INSERT ON users FOR EACH ROW EXECUTE FUNCTION insert_into_balance();
 -- Function (girilen organizasyon için kaç adet açık teklifin bulunduğunu döndüren fonksiyon)
-CREATE OR REPLACE FUNCTION offerCount(organizationName organizations.org_name %TYPE) RETURNS INT AS $$
+DROP FUNCTION IF EXISTS offerCount(
+    organizations.org_name %TYPE,
+    offers.time_period %TYPE,
+    offers.max_guest_count %TYPE
+);
+CREATE OR REPLACE FUNCTION offerCount(
+        organizationName organizations.org_name %TYPE,
+        timePeriod offers.time_period %TYPE,
+        maxGuestCount offers.max_guest_count %TYPE
+    ) RETURNS INT AS $$
 DECLARE offer_count INT;
 BEGIN offer_count := 0;
-SELECT COUNT(offers.comp_id) INTO offer_count
-FROM companies,
-    offers,
-    organizations
-WHERE companies.id = offers.comp_id
-    AND offers.org_type = organizations.id
-    AND organizations.org_name = organizationName
-    AND offers.accepted = 'FALSE';
+SELECT COUNT(*) INTO offer_count
+FROM (
+        SELECT comp_name,
+            MIN(price)
+        FROM companies,
+            offers,
+            organizations
+        WHERE companies.id = offers.comp_id
+            AND offers.org_type = organizations.id
+            AND organizations.org_name = organizationName
+            AND offers.accepted = 'FALSE'
+            AND offers.time_period = timePeriod
+            AND offers.max_guest_count >= maxGuestCount
+        GROUP BY comp_name
+    );
 RETURN offer_count;
 END;
 $$ LANGUAGE plpgsql;
@@ -133,6 +152,7 @@ CREATE TYPE user_info AS (
     balance INT,
     accepted_offer_count INT
 );
+DROP FUNCTION IF EXISTS getUserInfo(users.id %TYPE);
 CREATE OR REPLACE FUNCTION getUserInfo(userId users.id %TYPE) RETURNS user_info AS $$
 DECLARE information user_info;
 accepted_offer_count INT;
@@ -153,25 +173,32 @@ WHERE users.id = userId
 RETURN information;
 END;
 $$ LANGUAGE plpgsql;
--- Function (record ve cursor içeren - stokta bulunan ürünleri listeler)
+-- Function (record ve cursor içeren - stokta bulunan ürünleri listeler aynı zamanda group by ve having de içeriyor)
 DROP TYPE IF EXISTS product_info CASCADE;
-CREATE TYPE product_info AS (product_name VARCHAR(50), price INT, stock INT);
-
+CREATE TYPE product_info AS (
+    product_id INT,
+    product_name VARCHAR(50),
+    price INT,
+    stock INT
+);
+DROP FUNCTION IF EXISTS getProductsInStock(organizations.org_name %TYPE);
 CREATE OR REPLACE FUNCTION getProductsInStock(organizationName organizations.org_name %TYPE) RETURNS product_info [] AS $$
 DECLARE stock_cursor CURSOR FOR
-SELECT product_name,
+SELECT products.id,
+    product_name,
     price,
     stock
 FROM products,
     organizations
 WHERE products.product_type = organizations.id
-    AND organizations.org_name = organizationName;
+    AND organizations.org_name = organizationName
+GROUP BY(products.id, product_name, price, stock)
+HAVING SUM(stock) > 0;
 prod product_info [];
 i INT;
 BEGIN i := 1;
-FOR stock_record IN stock_cursor LOOP IF stock_record.stock > 0 THEN prod [i] = stock_record;
+FOR stock_record IN stock_cursor LOOP prod [i] = stock_record;
 i := i + 1;
-END IF;
 END LOOP;
 RETURN prod;
 END;
