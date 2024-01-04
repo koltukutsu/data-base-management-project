@@ -604,7 +604,7 @@ const Home = () => {
                   <TableCell>{product.productId}</TableCell>
                   <TableCell>{product.productName}</TableCell>
                   <TableCell>{product.price}</TableCell>
-                  <TableCell><Button onClick={() => deleteChosenProduct(product)}>Sil</Button></TableCell>
+                  <TableCell><Button style={{ backgroundColor: 'red', color: 'white' }} onClick={() => deleteChosenProduct(product)}>Sil</Button></TableCell>
                 </TableRow>
               ))}
             </TableBody>
