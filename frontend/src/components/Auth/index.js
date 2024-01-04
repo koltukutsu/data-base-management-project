@@ -149,7 +149,7 @@ INSERT ON users FOR EACH ROW EXECUTE FUNCTION insert_into_balance();`);
                 fullWidth
                 id="username"
                 label="Kullanıcı Adı"
-                name="username"
+                name="username"isChosenOffer
                 autoComplete="username"
                 autoFocus
               />

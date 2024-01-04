@@ -26,28 +26,45 @@ export function UserInformation() {
         }
     }
     return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '20px' }}>Kullanıcı Adı: {user}</span>
-            <Typography variant="subtitle1" style={{ marginRight: '20px' }}>
-                Cüzdan Para: {wallet} TL
-            </Typography>
-            <Typography variant="subtitle1" style={{ marginRight: '20px' }}>
-                Kabul Edilen Teklifler: {acceptedOffers}
-            </Typography>
-            <Button
-                aria-label="Logout User"
-                onClick={handleSubmit}
-            >
-                Çıkış Yap
-            </Button>
-            <Button
-                aria-label="Delete User"
-                onClick={handleDelete}
-                className='text-red-500'
-            >
-                Hesabı Sil
-            </Button>
+        <div
+            className='border rounded-bg'
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between', // Align items to the start and end of the container
+                marginBottom: '20px',
+                padding: '10px'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '20px', fontWeight: 'bold' }}>Kullanıcı Adı: </span>
+                <span>{user}</span>
+                <Typography variant="subtitle1" style={{ marginRight: '20px', fontWeight: 'bold', marginLeft: "20px" }}>
+                    Cüzdan Para: </Typography>
+                <Typography variant="subtitle1">{wallet} TL</Typography>
+                <Typography variant="subtitle1" style={{ marginLeft: "20px", marginRight: '20px', fontWeight: 'bold' }}>
+                    Kabul Edilen Teklifler: </Typography>
+                <Typography variant="subtitle1">{acceptedOffers}</Typography>
+            </div>
+            <div>
+                <Button
+                    aria-label="Logout User"
+                    onClick={handleSubmit}
+                    variant='contained'
+                >
+                    Çıkış Yap
+                </Button>
+                <Button
+                    aria-label="Delete User"
+                    onClick={handleDelete}
+                    style={{ backgroundColor: 'red', color: 'white', marginLeft: '10px' }}
+                >
+                    Hesabı Sil
+                </Button>
+            </div>
         </div>
+
+
     );
 
 }

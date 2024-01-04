@@ -15,6 +15,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Skeleton,
 } from "@mui/material";
 import { takeMoneyFromUserWallet } from "../../features/user/userSlice";
 import api from "../../api";
@@ -41,10 +42,14 @@ const Home = () => {
   const [selectedNumberOfPeople, setSelectedNumberOfPeople] = useState(0);
   const [seasons, setSeasons] = useState([]);
   const [organizations, setOrganizations] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  // const [companies, setCompanies] = useState([]);
   const [offers, setOffers] = useState([]);
   const [products, setProducts] = useState([]);
   const [amountOfOffers, setAmountofOffers] = useState(0);
+  const [chosenProducts, setChosenProducts] = useState([]);
+  const [chosenOffers, setChosenOffers] = useState([]);
+
   const userId = useSelector((state) => state.userLogger.userId);
   const userWallet = useSelector((state) => state.userLogger.wallet);
 
@@ -90,11 +95,12 @@ const Home = () => {
 
     });
     // not necessary
-    api.getCompanies().then((data) => {
-      console.log("API: Gotten Companies")
-      setCompanies(data);
-      // return console.log(data);
-    });
+    // api.getCompanies().then((data) => {
+    //   console.log("API: Gotten Companies")
+    //   setCompanies(data);
+    //   // return console.log(data);
+    // });
+
     // api.listAvailableOffers().then((data) => {
     //   console.log("API: Gotten Offers")
     //   // setOffers(data);
@@ -147,11 +153,24 @@ const Home = () => {
   //   );
   // };
   const OrganizationImages = () => {
-    console.log("Chosen organization image: ", organizationImages[selectedOrganization.id])
-    return (
-      <img className="rounded-lg" src={organizationImages[selectedOrganization.id]} />
-    );
-  }
+    if (!selectedOrganization || Object.keys(selectedOrganization).length === 0) {
+      // Render a skeleton when there's no selected organization
+      return <img
+        className="rounded-lg"
+        src={"/images/placeholder.webp"}
+        alt={"Place Holder"}
+      />;
+    } else {
+      // Render the actual image when an organization is selected
+      return (
+        <img
+          className="rounded-lg"
+          src={organizationImages[selectedOrganization.id]}
+          alt={selectedOrganization.org_name}
+        />
+      );
+    }
+  };
 
   // const ChooseCompanyType = () => {
   //   return (
@@ -211,30 +230,50 @@ const Home = () => {
     ];
     const OfferRows = () => {
 
-      const handleChosenCompanyOffer = (userId, offerId, offerPrice) => {
+      const handleChosenCompanyOffer = (isChosenOffer, offer, userId, offerId, offerPrice) => {
         console.log("Here is the selected Company: ", selectedCompany)
         const numericOfferPrice = parseFloat(offerPrice);
-        if (userWallet < numericOfferPrice) {
-          alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
-          return;
-        }
-        const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
-        if (!isConfirmed) {
-          api.updateOffers(userId, offerId).then((data) => {
-            console.log("API: updateOffers", offerId, data)
-          })
-          const updatedOffersLocally = offers.map((offer) => {
 
-            if (offer.id === offerId) {
-              offer.accepted = true;
-              offer.accepted_by_id = userId;
-            }
-            return offer;
-          })
-          // take money from user wallet
-          dispatch(takeMoneyFromUserWallet(numericOfferPrice))
+        // if (userWallet < numericOfferPrice) {
+        //   alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
+        //   return;
+        // }
+        // const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
+        // if (!isConfirmed) {
+        //   api.updateOffers(userId, offerId).then((data) => {
+        //     console.log("API: updateOffers", offerId, data)
+        //   })
+        //   const updatedOffersLocally = offers.map((offer) => {
 
-          setOffers(updatedOffersLocally);
+        //     if (offer.id === offerId) {
+        //       offer.accepted = true;
+        //       offer.accepted_by_id = userId;
+        //     }
+        //     return offer;
+        //   })
+        //   // take money from user wallet
+        //   dispatch(takeMoneyFromUserWallet(numericOfferPrice))
+
+        //   setOffers(updatedOffersLocally);
+        // }
+
+        // if (userWallet < numericOfferPrice) {
+        //   alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
+        //   return;
+        // }
+        if (isChosenOffer) {
+          const isConfirmed = window.confirm('Bu teklifi iptal etmek istediğinize emin misiniz?');
+          if (isConfirmed) {
+            setTotalPrice(totalPrice - numericOfferPrice)
+            setChosenOffers(chosenOffers.filter((chosenProduct) => chosenProduct !== offer))
+          }
+        } else {
+          const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
+          if (isConfirmed) {
+            setTotalPrice(totalPrice + numericOfferPrice)
+            setChosenOffers([...chosenOffers, offer])
+
+          }
         }
       };
 
@@ -245,26 +284,18 @@ const Home = () => {
       return offers.map((offer) => {
         // print every info related
         // console.log("Offer: ", offer)
-
-
+        const isChosenOffer = chosenOffers.findIndex((chOffer) => chOffer === offer) !== -1;
+        console.log("KONTROOLLLL")
+        console.log("isChosenOffer: ", isChosenOffer)
+        console.log("Offer: ", offer)
+        console.log("Chosen Offers: ", chosenOffers)
         return (
-          <TableRow key={offer.id}>
-            {/* <TableCell>{offer.id}</TableCell> */}
-            {/* <TableCell>{
-              offer.comp_name}</TableCell>
-            <TableCell>
-              {offer.org_name}
-            </TableCell> */}
-            {/* <TableCell>{offer.accepted}</TableCell> */}
-            {/* <TableCell>{offer.max_guest_count}</TableCell> */}
-            {/* <TableCell>{offer.time_period}</TableCell> */}
-            {/* <TableCell>{offer.price}</TableCell> */}
+          <TableRow key={offer.offerid}>
             <TableCell>{offer.offerid}</TableCell>
             <TableCell>{offer.comp_name}</TableCell>
             <TableCell>{offer.price}</TableCell>
-            {/* <TableCell>{offer.accepted_by_id}</TableCell> */}
-            <TableCell><Button onClick={() => handleChosenCompanyOffer(userId, offer.id, offer.price)}>Şirketi Seç</Button></TableCell>
-          </TableRow>
+            <TableCell><Button variant={isChosenOffer ? "contained" : "outlined"} onClick={() => handleChosenCompanyOffer(isChosenOffer, offer, userId, offer.id, offer.price)}>{isChosenOffer ? "Teklifi Kaldır" : "Teklifi Seç"}</Button></TableCell>
+          </TableRow >
         );
       });
     }
@@ -272,31 +303,33 @@ const Home = () => {
       return null;
     }
     return (
-      <>
-        <Typography variant="h4" gutterBottom>
-          Şirketler Teklifleri: {amountOfOffers}
-        </Typography>
-        {offers.length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell key={column}>{column}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <OfferRows />
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Typography variant="body1" paragraph>
-            Henüz teklif yok
+      <Container className="rounded-lg border">
+        <Box className="m-2">
+          <Typography variant="h4" gutterBottom>
+            Şirketler Teklifleri: {amountOfOffers}
           </Typography>
-        )}
-      </>
+          {offers.length > 0 ? (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell key={column}>{column}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <OfferRows />
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography variant="body1" paragraph>
+              Henüz teklif yok
+            </Typography>
+          )}
+        </Box>
+      </Container>
     );
   };
 
@@ -311,19 +344,30 @@ const Home = () => {
     const ProductRows = () => {
       return products.map((product) => {
 
-        const handleChosenProductOffer = (userId, productName, productPrice) => {
+        const handleChosenProductOffer = (isChosenProduct, product, userId, productName, productPrice) => {
 
           const numericOfferPrice = parseFloat(productPrice);
-          if (userWallet < numericOfferPrice) {
-            alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
-            return;
-          }
-          const isConfirmed = window.confirm('Bu teklifi kabul etmek istediğinize emin misiniz?');
-          if (isConfirmed) {
+          // if (userWallet < numericOfferPrice) {
+          //   alert("Yetersiz bakiye. Lütfen cüzdanınızı doldurun.")
+          //   return;
+          // }
+          if (isChosenProduct) {
+            const isConfirmed = window.confirm('Bu ürünü iptal etmek istediğinize emin misiniz?');
+            if (isConfirmed) {
+              setTotalPrice(totalPrice - numericOfferPrice)
+              setChosenProducts(chosenProducts.filter((chosenProduct) => chosenProduct !== product))
+            }
+          } else {
+            const isConfirmed = window.confirm('Bu ürünü kabul etmek istediğinize emin misiniz?');
+            if (isConfirmed) {
+              setTotalPrice(totalPrice + numericOfferPrice)
+              setChosenProducts([...chosenProducts, product])
 
+            }
           }
+
         }
-
+        const isChosenProduct = chosenProducts.findIndex((chProduct) => chProduct === product) !== -1;
         return (
           <TableRow key={product.productName}>
             <TableCell>{product.productId}</TableCell>
@@ -334,38 +378,40 @@ const Home = () => {
             <TableCell>{
               product.price}</TableCell>
             <TableCell>
-              <Button onClick={() => handleChosenProductOffer(userId, product.productName, product.price)}>Ürünü Seç</Button></TableCell>
+              <Button variant={isChosenProduct ? "contained" : "outlined"} onClick={() => handleChosenProductOffer(isChosenProduct, product, userId, product.productName, product.price)}>{isChosenProduct ? "Ürünü Kaldır" : "Ürünü Seç"}</Button></TableCell>
           </TableRow>
         );
       })
     }
 
     return (
-      <>
-        <Typography variant="h4" gutterBottom>
-          Ürünler: {products.length}
-        </Typography>
-        {products.length > 0 ? (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell key={column}>{column}</TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <ProductRows />
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Typography variant="body1" paragraph>
-            Henüz ürün yok
+      <Container className="rounded-lg border">
+        <Box className="m-2">
+          <Typography variant="h4" gutterBottom>
+            Ürünler: {products.length}
           </Typography>
-        )}
-      </>
+          {products.length > 0 ? (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell key={column}>{column}</TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <ProductRows />
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography variant="body1" paragraph>
+              Henüz ürün yok
+            </Typography>
+          )}
+        </Box>
+      </Container>
     );
   }
 
@@ -412,7 +458,7 @@ const Home = () => {
     };
 
     return (
-      <>
+      <Container className="border rounded-bg">
         <Box noValidate sx={{ mt: 1 }}>
           <Typography variant="h4" gutterBottom>
             Parti Dünyası
@@ -477,30 +523,126 @@ const Home = () => {
           sx={{ mt: 3, mb: 2 }}
         >
           Teklif Al
-        </Button></>
+        </Button></Container>
+    );
+  };
+
+  const CompaniesAndProductsChosenByUser = ({ chosenOffers, chosenProducts }) => {
+    const onPurchase = () => {
+
+    }
+
+    const deleteChosenOffer = (offer) => {
+      const numericOfferPrice = parseFloat(offer.price);
+      const isConfirmed = window.confirm('Bu teklifi silmek istediğinize emin misiniz?');
+
+      if (isConfirmed) {
+        setTotalPrice(totalPrice - numericOfferPrice)
+        setChosenOffers(chosenOffers.filter((chosenOffer) => chosenOffer !== offer))
+      }
+    }
+
+    const deleteChosenProduct = (product) => {
+      const numericProductPrice = parseFloat(product.price);
+      const isConfirmed = window.confirm('Bu ürünü silmek istediğinize emin misiniz?');
+
+      if (isConfirmed) {
+        setTotalPrice(totalPrice - numericProductPrice)
+        setChosenProducts(chosenProducts.filter((chosenProduct) => chosenProduct !== product))
+      }
+
+    }
+
+
+
+    return (
+      <Container className="border rounded-bg p-4">
+        <Typography variant="h4" gutterBottom>Seçilenlerler</Typography>
+        <Typography variant="h5" gutterBottom>Teklifler</Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {/* make it bold */}
+                <TableCell>Teklif ID</TableCell>
+                <TableCell>Şirket Adı</TableCell>
+                <TableCell>Fiyat</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {chosenOffers.map((offer) => (
+                <TableRow key={offer.offerid}>
+                  {/* Render offer details */}
+                  <TableCell>{offer.offerid}</TableCell>
+                  <TableCell>{offer.comp_name}</TableCell>
+                  <TableCell>{offer.price}</TableCell>
+                  <TableCell><Button onClick={() => deleteChosenOffer(offer)}
+                    style={{ backgroundColor: 'red', color: 'white' }}
+                  >Sil</Button></TableCell>
+                </TableRow>
+
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Typography variant="h5" gutterBottom>Ürünler</Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {/* Add the necessary columns */}
+                <TableCell>Ürün ID</TableCell>
+                <TableCell>Ürün Adı</TableCell>
+                <TableCell>Fiyat</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {chosenProducts.map((product) => (
+                <TableRow key={product.productId}>
+                  {/* Render product details */}
+                  <TableCell>{product.productId}</TableCell>
+                  <TableCell>{product.productName}</TableCell>
+                  <TableCell>{product.price}</TableCell>
+                  <TableCell><Button onClick={() => deleteChosenProduct(product)}>Sil</Button></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {/* Sum of the prices, use Typography */}
+        <Typography variant="h5" gutterBottom className="pt-4">
+          Toplam Fiyat: {totalPrice}
+        </Typography>
+        <div style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+          <Button onClick={onPurchase} variant="contained">Satın Al</Button>
+        </div>
+      </Container>
     );
   };
 
 
   return (
-    <Container className="pt-10">
+    <Container className="pt-10 pb-10">
       <UserInformation />
       <Grid container spacing={4}>
+        <Grid item xs={12}>
+          <OrganizationImages />
+        </Grid>
         <Grid item xs={4}>
           <UserSpecialChoices />
         </Grid>
         <Grid item xs={8}>
-          <OrganizationImages />
+          < CompaniesAndProductsChosenByUser chosenOffers={chosenOffers} chosenProducts={chosenProducts} />
         </Grid>
-        {/* <Grid item xs={4}>
-          < UserSpecialChoices />
-        </Grid> */}
-        <Grid item xs={12}>
+
+        <Grid item xs={6}>
           <AllOffersForTheOrganizationAndCompany />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <AllProductsForOrganization />
         </Grid>
+
       </Grid>
     </Container>
   );
