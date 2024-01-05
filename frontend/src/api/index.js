@@ -125,6 +125,18 @@ const api = {
         }
     },
 
+    updateUserWalletForBuyingProduct: async (userId, productId, productPrice) => {
+        try {
+            const response = await fetch(`${BASE_URL}/users/${userId}/${productId}/${productPrice}`, {
+                method: 'PUT'
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    },
+
     listAvailableOffers: async (organizationName, season, amountOfPeople) => {
         try {
             console.log("listAvailableOffers: ", organizationName, season, amountOfPeople)

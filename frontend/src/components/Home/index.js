@@ -57,33 +57,15 @@ const Home = () => {
 
   const handleSelectedOrganization = (event) => {
     console.log("Here is the selected Organization: ", event.target.value)
-    // api.getOffersBasedOnOrganization(event.target.value.org_name).then((data) => {
-    //   console.log("Taken; getOffersBasedOnOrganization()", data)
-    //   const amountOfOffers = data.offercount;
-    //   setAmountofOffers(amountOfOffers)
-    //   // return console.log(data);
-    // })
+
 
     setSelectedOrganization(event.target.value);
   };
-  // const handleSelectedCompany = (event) => {
-  //   console.log("Here is the selected Company: ", event.target.value)
-  //   setSelectedCompany(event.target.value);
-  // };
 
   const handleSelectedSeason = (event) => {
     console.log("Here is the selected Season: ", event.target.value)
     setSelectedSeason(event.target.value);
   };
-
-  // const handleSelectedNumberOfPeople = (event) => {
-  //   console.log("Here is the selected Number of People: ", event.target.value)
-  //   setSelectedNumberOfPeople(event.target.value);
-  // };
-
-  // const handleUserSpecialChoices = (amountOfPeople) => {
-
-  // }
 
   useEffect(() => {
     document.title = "Parti Dünyası";
@@ -94,28 +76,7 @@ const Home = () => {
       setOrganizations(data);
 
     });
-    // not necessary
-    // api.getCompanies().then((data) => {
-    //   console.log("API: Gotten Companies")
-    //   setCompanies(data);
-    //   // return console.log(data);
-    // });
 
-    // api.listAvailableOffers().then((data) => {
-    //   console.log("API: Gotten Offers")
-    //   // setOffers(data);
-    //   // setAmountofOffers(data.length);
-
-    //   // set
-    //   const seasons = new Set();
-    //   data.forEach((offer) => {
-    //     // console.log("offer:", offer)
-    //     seasons.add(offer.time_period);
-    //   })
-    //   setSeasons([...seasons]);
-    //   console.log("Seasons: ", seasons)
-    //   // return console.log(data);
-    // });
 
     api.getSeasons().then((data) => {
       console.log("API: Gotten Seasons", data)
@@ -125,33 +86,6 @@ const Home = () => {
 
   }, []);
 
-  // const ChooseOrganizationType = () => {
-  //   return (
-  //     <>
-  //       <Typography variant="h4" gutterBottom>
-  //         Parti Dünyası
-  //       </Typography>
-  //       <Typography variant="body1" paragraph>
-  //         Organizasyon Çeşidi Seçiniz:
-  //       </Typography>
-  //       <Select
-  //         label="Bir tane seçiniz"
-  //         value={selectedOrganization}
-  //         onChange={handleSelectedOrganization}
-  //         fullWidth
-  //         sx={{ marginTop: 2 }}
-  //       >
-  //         {/* ORGANIZATION TYPES */}
-  //         {
-  //           organizations.map((organization) => (
-  //             <MenuItem key={organization.id} value={organization}>{organization.org_name}</MenuItem>
-  //           ))
-  //         }
-  //       </Select>
-
-  //     </>
-  //   );
-  // };
   const OrganizationImages = () => {
     if (!selectedOrganization || Object.keys(selectedOrganization).length === 0) {
       // Render a skeleton when there's no selected organization
@@ -172,60 +106,11 @@ const Home = () => {
     }
   };
 
-  // const ChooseCompanyType = () => {
-  //   return (
-  //     <>
-  //       <Typography variant="h4" gutterBottom>
-  //         Şirketler
-  //       </Typography>
-  //       <Typography variant="body1" paragraph>
-  //         Şirket Çeşidi Seçiniz:
-  //       </Typography>
-  //       <Select
-  //         label="Bir tane seçiniz"
-  //         value={selectedCompany}
-
-  //         onChange={handleSelectedCompany}
-  //         fullWidth
-  //         sx={{ marginTop: 2 }}
-  //       >
-  //         {/* COMPANY TYPES */}
-  //         {
-  //           companies.map((company) => {
-  //             return (
-  //               <MenuItem key={company.id} value={company}>{company.comp_name}</MenuItem>
-  //             );
-  //           })
-  //         }
-  //       </Select>
-  //       <Button
-  //         type="submit"
-  //         fullWidth
-  //         variant="contained"
-  //         sx={{ mt: 3, mb: 2 }} onClick={() => {
-  //           setSelectedCompany({});
-  //           setSelectedOrganization({});
-  //         }}
-  //       > Temizle</Button>
-  //     </>
-  //   );
-  // }
   const AllOffersForTheOrganizationAndCompany = () => {
-    // Assuming 'offers' state contains the data fetched from the API
-    // Modify this according to your actual data structure
-
-    // Replace with actual column names from your API response
-
     const columns = [
       "Teklif ID",
-      // "Şirket ID",
-      // "Organizasyon Türü",
-      // "Kabul Edildi",
       "Şirket Adı",
-      // "Maksimum Misafir Sayısı",
-      // "Zaman Aralığı",
       "Fiyat",
-      // "Kabul Eden Kullanıcı ID",
       "\t\t"
     ];
     const OfferRows = () => {
@@ -416,7 +301,7 @@ const Home = () => {
   }
 
   const UserSpecialChoices = () => {
-    const handleFormSubmit = () => {
+    const handleGetOffersAndProducts = () => {
       console.log("Handle form submit for Special Choices")
       console.log("Handle this Here is the selected Organization: ", selectedOrganization)
       console.log("Here is the selected Season: ", selectedSeason)
@@ -456,7 +341,6 @@ const Home = () => {
         // return console.log(data);
       })
     };
-
     return (
       <Container className="border rounded-bg">
         <Box noValidate sx={{ mt: 1 }}>
@@ -519,7 +403,7 @@ const Home = () => {
           // type="submit"
           fullWidth
           variant="contained"
-          onClick={handleFormSubmit}
+          onClick={handleGetOffersAndProducts}
           sx={{ mt: 3, mb: 2 }}
         >
           Teklif Al
@@ -529,6 +413,59 @@ const Home = () => {
 
   const CompaniesAndProductsChosenByUser = ({ chosenOffers, chosenProducts }) => {
     const onPurchase = () => {
+
+      const canBuy = userWallet >= totalPrice;
+      const newBalance = userWallet - totalPrice;
+      if (canBuy) {
+
+        const isConfirmed = window.confirm('Bu ürünleri ve teklifleri satın almak istediğinize emin misiniz?');
+
+        if (isConfirmed) {
+          chosenOffers.forEach((offer) => {
+            const offerId = offer.offerid;
+
+            api.updateOffers(userId, offerId).then((data) => {
+              console.log("API: updateOffers", offerId, data)
+            })
+          })
+
+          chosenProducts.forEach((product) => {
+            const productId = product.productId;
+            const productPrice = product.price;
+            api.updateUserWalletForBuyingProduct(userId, productId, newBalance).then((data) => {
+              console.log("API: updateUserWalletForBuyingProduct", productId, data)
+            })
+          })
+          // const updatedOffersLocally = offers.map((offer) => {
+
+          //   if (offer.id === offerId) {
+          //     offer.accepted = true;
+          //     offer.accepted_by_id = userId;
+          //   }
+          //   return offer;
+          // })
+          // take money from user wallet
+
+
+          // setOffers(updatedOffersLocally);
+          dispatch(takeMoneyFromUserWallet({ moneyAmount: totalPrice }))
+          alert("Satın alma işlemi başarılı.")
+          // reset the user chosen offers and products
+          setChosenOffers([])
+          setChosenProducts([])
+          setTotalPrice(0)
+          // reset the user preferences for getting the offers and the products
+          setSelectedOrganization({})
+          setSelectedSeason(null)
+          setSelectedNumberOfPeople(0)
+          // reset the offers and products
+          setOffers([])
+          setProducts([])
+
+        }
+      } else {
+        alert("Cüzdanınızdaki bakiye bu alışverişi yapmak için yetersizdir.")
+      }
 
     }
 

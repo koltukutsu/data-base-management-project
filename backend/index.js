@@ -10,6 +10,7 @@ const {
     getCompanies,
     getSeasons,
     updateOffers,
+    updateUserBalanceForBuyingProduct,
     getOffersBasedOnOrganization,
     getProductsBasedOnOrganization,
     listAvailableOffers
@@ -148,6 +149,19 @@ app.put('/offers/:userId/:offerId', async (req, res) => {
         res.json({ message: 'Offer updated successfully' });
     } else {
         res.status(500).json({ message: 'Failed to update offer' });
+    }
+});
+
+app.put('/users/:userId/:productId/:moneyAmount', async (req, res) => {
+    const userId = req.params.userId;
+    const productId = req.params.productId;
+    const moneyAmount = req.params.moneyAmount;
+    const result = await updateUserBalanceForBuyingProduct(userId, productId, moneyAmount);
+
+    if (result) {
+        res.json({ message: 'User and product updated successfully' });
+    } else {
+        res.status(500).json({ message: 'Failed to update and product user' });
     }
 });
 

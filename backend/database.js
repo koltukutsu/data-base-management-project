@@ -224,7 +224,7 @@ async function getProductsBasedOnOrganization(organizationName) {
     }
 }
 
-async function udpateUserBalance(userId, productId, newBalance, newStock) {
+async function updateUserBalanceForBuyingProduct(userId, productId, newBalance) {
     try {
         const client = await pool.connect();
         try {
@@ -232,9 +232,9 @@ async function udpateUserBalance(userId, productId, newBalance, newStock) {
 SET amount = $3
 WHERE user_id = $1;
 UPDATE products
-SET stock = $4
+SET stock = stock - 1
 WHERE id = $2`
-            const sqlResult = await client.query(sqlQuery, [userId, productId, newBalance, newStock]);
+            const sqlResult = await client.query(sqlQuery, [userId, productId, newBalance]);
             if (sqlResult.rows.length == 0) {
                 console.log(`Database | udpateUserBalance(): No user found in name ${userId}`);
                 console.log("No user found");
@@ -414,7 +414,7 @@ async function getSeasons() {
 
 
 module.exports = {
-    authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser, udpateUserBalance,
+    authenticateUser, getUserInfo, getOrganizations, getCompanies, addUser, updateUserBalanceForBuyingProduct,
     getSeasons, getProductsBasedOnOrganization,
     getOffersBasedOnOrganization, deleteUser, updateOffers, listAvailableOffers
 }

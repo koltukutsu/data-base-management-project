@@ -27,6 +27,7 @@ export const storeSlice = createSlice({
         },
         takeMoneyFromUserWallet: (state, action) => {
             state.wallet -= action.payload.moneyAmount
+            state.acceptedOffers += 1
         }
     },
 })
