@@ -225,30 +225,28 @@ async function getProductsBasedOnOrganization(organizationName) {
 }
 
 async function updateUserBalanceForBuyingProduct(userId, productId, newBalance) {
+    const client = await pool.connect();
     try {
-        const client = await pool.connect();
-        try {
-            const sqlQuery = `UPDATE balance
-SET amount = $3
-WHERE user_id = $1;
-UPDATE products
-SET stock = stock - 1
-WHERE id = $2`
-            const sqlResult = await client.query(sqlQuery, [userId, productId, newBalance]);
-            if (sqlResult.rows.length == 0) {
-                console.log(`Database | udpateUserBalance(): No user found in name ${userId}`);
-                console.log("No user found");
-                return null;
-            }
-            else {
-                console.log("Database | udpateUserBalance(): User Found.");
-                return true;
-            }
-        } catch (err) {
-            console.error("Error executing query", err);
-        }
-    } catch (err1) {
-        console.error("Error connecting to the database", err1);
+        await client.query('BEGIN'); // Start the transaction
+
+        // Update balance
+        const balanceQuery = 'UPDATE balance SET amount = $1 WHERE user_id = $2';
+        await client.query(balanceQuery, [newBalance, userId]);
+
+        // Update product stock
+        const productQuery = 'UPDATE products SET stock = stock - 1 WHERE id = $1';
+        await client.query(productQuery, [productId]);
+
+        await client.query('COMMIT'); // Commit the transaction
+
+        console.log("Database | updateUserBalance(): Transaction committed successfully.");
+        return true;
+    } catch (err) {
+        await client.query('ROLLBACK'); // Roll back the transaction in case of an error
+        console.error("Error executing transaction", err);
+        return null;
+    } finally {
+        client.release(); // Release the client back to the pool
     }
 }
 
