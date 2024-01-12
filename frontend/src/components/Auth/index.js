@@ -83,7 +83,7 @@ export default function Authentication() {
 
         navigate('/home');
         alert(`Kullanıcı başarıyla oluşturuldu.
-        1000 para hediye edildi.
+        10000 para hediye edildi.
         Trigger Kullanıldı: 
 CREATE OR REPLACE FUNCTION insert_into_balance() RETURNS TRIGGER AS $$ BEGIN
 INSERT INTO balance (user_id, amount)
