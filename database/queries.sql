@@ -8,9 +8,9 @@ WHERE id = `$user_id`;
 SELECT MIN(offer_view.id), comp_name,
     MIN(price)
 FROM offer_view
-WHERE org_name = 'Mezuniyet'
-    AND time_period = 'Yaz'
-    AND max_guest_count >= 1000
+WHERE org_name = `$org_name`
+    AND time_period = `$time`
+    AND max_guest_count >= `$guest_count`
 GROUP BY(comp_name)
 EXCEPT
 SELECT MIN(ow.id), comp_name,
