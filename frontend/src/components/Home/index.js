@@ -16,6 +16,7 @@ import {
   TableCell,
   TableBody,
   Skeleton,
+  isMuiElement,
 } from "@mui/material";
 import { takeMoneyFromUserWallet } from "../../features/user/userSlice";
 import api from "../../api";
@@ -421,6 +422,7 @@ const Home = () => {
         const isConfirmed = window.confirm('Bu ürünleri ve teklifleri satın almak istediğinize emin misiniz?');
 
         if (isConfirmed) {
+
           chosenOffers.forEach((offer) => {
             const offerId = offer.offerid;
 
@@ -468,6 +470,7 @@ const Home = () => {
       }
 
     }
+  
 
     const deleteChosenOffer = (offer) => {
       const numericOfferPrice = parseFloat(offer.price);
