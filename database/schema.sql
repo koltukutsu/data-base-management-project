@@ -102,12 +102,12 @@ END;
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER user_delete_trigger
 AFTER DELETE ON users FOR EACH ROW EXECUTE PROCEDURE update_accepted_by_id();
--- Trigger (yeni kaydolan kullanıcıya 100 lira hoş geldin bonusu)
+-- Trigger (yeni kaydolan kullanıcıya 10000 lira hoş geldin bonusu)
 DROP TRIGGER IF EXISTS insert_into_balance_trigger ON users;
 DROP FUNCTION IF EXISTS insert_into_balance;
 CREATE OR REPLACE FUNCTION insert_into_balance() RETURNS TRIGGER AS $$ BEGIN
 INSERT INTO balance (user_id, amount)
-VALUES (NEW.id, 1000);
+VALUES (NEW.id, 10000);
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
